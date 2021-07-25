@@ -29,19 +29,19 @@
 - 기능적 요구사항(전체)
 1. 휴양소 관리자는 휴양소를 등록한다.
 2. 고객이 휴양소를 선택하여 예약한다.
-4. 고객이 예약한 휴양소를 결제한다.(팀과제에서 제외)
-5. 예약이 확정되어 휴양소는 예약불가 상태로 바뀐다.
-6. 바우처가 고객에게 발송된다. (팀과제에서 제외)
-7. 고객이 확정된 예약을 취소할 수 있다.
-8. 주문이 취소되면 바우처가 비활성화 된다.(팀과제에서 제외)
-9. 휴양소는 예약가능 상태로 바뀐다.
-10. 고객은 휴양소 예약 정보를 확인 할 수 있다.
+3. 고객이 예약한 휴양소를 결제한다.(팀과제에서 제외했던 부분 구현)
+4. 예약이 확정되어 휴양소는 예약불가 상태로 바뀐다.
+5. 바우처가 고객에게 발송된다. (팀과제에서 제외했던 부분 구현)
+6. 고객이 확정된 예약을 취소할 수 있다.
+7. 주문이 취소되면 바우처가 비활성화 된다.(팀과제에서 제외했던 부분 구현)
+8. 휴양소는 예약가능 상태로 바뀐다.
+9. 고객은 휴양소 예약 정보를 확인 할 수 있다.
 
 - 비기능적 요구사항
 1. 트랜잭션
     1. 리조트 상태가 예약 가능상태가 아니면 아예 예약이 성립되지 않아야 한다  Sync 호출 
 1. 장애격리
-    1. 결제/바우처/마이페이지 기능이 수행되지 않더라도 주문은 365일 24시간 받을 수 있어야 한다.  Async (event-driven), Eventual Consistency
+    1. 결제/바우처/마이페이지 기능이 수행되지 않더라도 예약은 365일 24시간 받을 수 있어야 한다.  Async (event-driven), Eventual Consistency
     1. 예약시스템이 과중되면 사용자를 잠시동안 받지 않고 잠시후에 하도록 유도한다.  Circuit breaker, fallback
 1. 성능
     1. 고객이 자신의 예약 상태를 확인할 수 있도록 마이페이지가 제공 되어야 한다.  CQRS
@@ -58,7 +58,7 @@
 
 
 ## Event Storming 결과
-* MSAEz 로 모델링한 이벤트스토밍 결과: http://www.msaez.io/#/storming/Rk7HwUkaXvX3C7EArWnMpnml68j1/share/4992a1785df30cc101b0e57f3400fa2d
+* MSAEz 로 모델링한 이벤트스토밍 결과: http://www.msaez.io/#/storming/yyBCMACQzEZNjgdLspgi0doyuXR2/916a728a8761f24fcc35f19189f086ab
 
 
 ### 이벤트 도출
@@ -84,8 +84,11 @@
 
 <img width="994" alt="image" src="https://user-images.githubusercontent.com/85722729/125240556-3bb5d700-e325-11eb-9bcf-d9c4d4d08e32.png">
 
+### 추가 과제 구현시 수정된 커맨드 추가 (결제시스템 상태조회)
+![image](https://user-images.githubusercontent.com/58622901/126890676-b2b1b931-b146-4896-9da5-bff07a677144.png)
+
 ### 완성된 모형
-<img width="1113" alt="image" src="https://user-images.githubusercontent.com/85722851/125246650-0614ec00-e32d-11eb-8129-963e5dab211d.png">
+![image](https://user-images.githubusercontent.com/58622901/126890730-ed83c3d1-d8f5-4d28-b7a4-19714778346d.png)
 
 - View Model 추가
 - 도메인 서열
@@ -94,9 +97,12 @@
   - General : payment, voucher
 
 ## 헥사고날 아키텍처 다이어그램 도출
-    
+
+- 팀과제 수행 시
 ![image](https://user-images.githubusercontent.com/85722729/125151798-bcd56880-e183-11eb-876b-074a02d94116.png)
 
+- 개인Final 수행 시 아키텍처 
+![image](https://user-images.githubusercontent.com/58622901/126894359-45426bab-99a0-4fb2-9290-345078b1b948.png)
 
 
     - Chris Richardson, MSA Patterns 참고하여 Inbound adaptor와 Outbound adaptor를 구분함
@@ -151,25 +157,31 @@ http aa9c6a809425d45b69b139edc5237d53-1942883713.ap-northeast-2.elb.amazonaws.co
 <img width="992" alt="image" src="https://user-images.githubusercontent.com/85722851/125231312-7c0d5900-e315-11eb-93bf-af4f025fc3d3.png">
 
 ## DDD 의 적용
-- 위 이벤트 스토밍을 통해 식별된 Micro Service 전체 5개 중 3개를 구현하였으며 그 중 mypage는 CQRS를 위한 서비스이다.
+- 팀 과제 시 이벤트 스토밍을 통해 식별된 Micro Service 전체 5개 중 3개를 구현하였으며 그 중 mypage는 CQRS를 위한 서비스이다.
+- 개인 과제 시 payment, voucher 서비스를 추가로 구현하였다.
 
 |MSA|기능|port|URL|
 | :--: | :--: | :--: | :--: |
 |reservation| 예약정보 관리 |8081|http://localhost:8081/reservations|
 |resort| 리조트 관리 |8082|http://localhost:8082/resorts|
 |mypage| 예약내역 조회 |8083|http://localhost:8083/mypages|
+|payment| 예약내역 결제 |8084|http://localhost:8084/payments|
+|voucher| 바우처 전송 |8085|http://localhost:8085/vouchers|
 |gateway| gateway |8088|http://localhost:8088|
 
 ## Gateway 적용
 - API GateWay를 통하여 마이크로 서비스들의 진입점을 통일할 수 있다. 
 다음과 같이 GateWay를 적용하였다.
+- 개인과제 구현 시 추가된 payment, voucher 서비스를 yaml 파일에 추가하여 구현 하였다. 
 
 ```yaml
 - gateway 서비스의 application.yml
 
 server:
   port: 8088
+
 ---
+
 spring:
   profiles: default
   cloud:
@@ -187,6 +199,14 @@ spring:
           uri: http://localhost:8083
           predicates:
             - Path= /myPages/**
+        - id: payment
+          uri: http://localhost:8084
+          predicates:
+            - Path=/payments/** 
+        - id: voucher
+          uri: http://localhost:8085
+          predicates:
+            - Path=/vouchers/** 
       globalcors:
         corsConfigurations:
           '[/**]':
@@ -197,7 +217,10 @@ spring:
             allowedHeaders:
               - "*"
             allowCredentials: true
+
+
 ---
+
 spring:
   profiles: docker
   cloud:
@@ -215,6 +238,14 @@ spring:
           uri: http://mypage:8080
           predicates:
             - Path= /myPages/**
+        - id: payment
+          uri: http://payment:8080
+          predicates:
+            - Path=/payments/** 
+        - id: voucher
+          uri: http://voucher:8080
+          predicates:
+            - Path=/vouchers/** 
       globalcors:
         corsConfigurations:
           '[/**]':
@@ -225,13 +256,15 @@ spring:
             allowedHeaders:
               - "*"
             allowCredentials: true
+
 server:
   port: 8080
 ```
 ## 폴리글랏 퍼시스턴스
-- CQRS 를 위한 mypage 서비스만 DB를 구분하여 적용함. 인메모리 DB인 hsqldb 사용.
+- 팀과제 구현 시 : CQRS 를 위한 mypage 서비스만 DB를 구분하여 적용함. 인메모리 DB인 hsqldb 사용.
+- 개인과제 구현 시 : voucher 전송을 위한 voucher 서비스만 DB를 구분하여 적용하였다. 인메모리 DB인 hsqldb를 사용하였고 mypage는 h2 db로 변경하였다.
 ```
-- maypage 서비스의 pom.xml
+- voucher 서비스의 pom.xml
 <!-- 
     <dependency>
         <groupId>com.h2database</groupId>
@@ -246,6 +279,8 @@ server:
         <scope>runtime</scope>
     </dependency>
 ```
+
+
 ## CQRS & Kafka
 - 타 마이크로서비스의 데이터 원본에 접근없이 내 서비스의 화면 구성과 잦은 조회가 가능하게 mypage에 CQRS 구현하였다.
 - 모든 정보는 비동기 방식으로 발행된 이벤트(예약, 예약취소, 가능상태변경)를 수신하여 처리된다.
@@ -317,14 +352,52 @@ public interface ResortService {
 <img width="1019" alt="image" src="https://user-images.githubusercontent.com/85722851/125232225-2174fc80-e317-11eb-9186-98995cf27f97.png">
 
 
+
+
+- 개인 Final 과제 수행 시에는 예약(reservation)->결제서비스상태확인(payment) 호출을 추가하여 동기식 일관성을 유지하는 트랜잭션을 구현하여 처리하였다. 호출 프로토콜은 이미 앞서 Rest Repository 에 의해 노출되어있는 REST 서비스를 FeignClient를 이용하여 호출하였다
+
+- 결제서비스를 호출하기 위하여 Stub과 (FeignClient) 를 이용하여 Service 대행 인터페이스 (Proxy) 를 구현하였다
+- 기존에 resort 서비스의 feignClient와 충돌이 나지 않기위해 각각 contextId를 부여하였다 (resortServicedml contextId는 feignClientForResort이다.
+
+```java
+# (reservation) PaymentService.java
+
+package resortreservation.external;
+
+@FeignClient(name="payment",contextId = "feignClientForPayment", url="${feign.payment.url}",  fallback = PaymentServiceFallback.class)
+public interface PaymentService {
+
+    @RequestMapping(method= RequestMethod.GET, value="/payments/{id}", consumes = "application/json")
+    public Payment getPaymentStatus(@PathVariable("id") Long id);
+
+}
+```
+- 예약을 처리 하기 직전(@PrePersist)에 PaymentSevice를 호출하여 서비스 상태를 가져온다.
+```java
+# Reservation.java (Entity)
+
+    @PrePersist
+    public void onPrePersist() throws Exception {
+        resortreservation.external.Payment payment = new resortreservation.external.Payment();
+        
+        System.out.print("#######paymentId="+payment);
+        //Payment 서비스에서 Payment의 상태를 가져옴
+        payment = ReservationApplication.applicationContext.getBean(resortreservation.external.PaymentService.class).getPaymentStatus(test);
+        
+         fallback 시 payment null return
+           if (payment == null){ 
+               throw new Exception("The payment is not in a usable status.");
+           }   
+    }
+```
+- 동기식 호출에서는 호출 시간에 따른 타임 커플링이 발생하며, 시스템이 장애로 예약을 못받는다는 것을 확인
+![image](https://user-images.githubusercontent.com/58622901/126894995-c594adcf-9889-427a-8204-d058ef9941eb.png)
+
 - 또한 과도한 요청시에 서비스 장애가 도미노 처럼 벌어질 수 있다. (서킷브레이커, 폴백 처리는 운영단계에서 설명한다.)
 
-
-
-
 ## 비동기식 호출 / 시간적 디커플링 / 장애격리 / 최종 (Eventual) 일관성 테스트
-- 예약이 이루어진 후에 결제시스템에 결제요청과 마이페이지시스템에 이력을 보내는 행위는 동기식이 아니라 비 동기식으로 처리하여 예약이 블로킹 되지 않아도록 처리한다.
-- 이를 위하여 예약기록을 남긴 후에 곧바로 예약완료가 되었다는 도메인 이벤트를 카프카로 송출한다(Publish)
+
+- 예약기록을 남긴 후에 곧바로 예약완료가 되었다는 도메인 이벤트를 카프카로 송출한다(Publish)
  
 ```java
 @Entity
@@ -340,9 +413,11 @@ public class Reservation {
     }
 }
 ```
-- 결제시스템과 마이페이지시스템에서는 예약완료 이벤트에 대해서 이를 수신하여 자신의 정책을 처리하도록 PolicyHandler 를 구현한다
+- 결제시스템과 바우처시스템, 마이페이지시스템에서는 예약완료,결제완료 이벤트에 대해서 이를 수신하여 자신의 정책을 처리하도록 PolicyHandler 를 구현한다
 
-결제시스템(팀과제에서는 미구현)
+결제시스템(팀과제에서는 미구현) --> 개인 Final 과제 수행 시 구현
+- 예약완료 후 결제대기 상태로 payment 객체를 생성한다.
+- 예약취소 후 결제상태를 Canceled로 변경 한다
 ```java
 
 @Service
@@ -353,11 +428,97 @@ public class PolicyHandler{
     public void wheneverReservationRegistered_PaymentRequestPolicy(@Payload ReservationRegistered reservationRegistered){
 
         if(!reservationRegistered.validate()) return;
+
         System.out.println("\n\n##### listener PaymentRequestPolicy : " + reservationRegistered.toJson() + "\n\n");
-        // Logic 구성 // 
+        
+            Payment payment = new Payment();
+            payment.setReservId(reservationRegistered.getId());
+            payment.setReservStatus("Waiting for payment"); 
+            payment.setResortPrice(reservationRegistered.getResortPrice());
+            paymentRepository.save(payment);
+            
+    }
+    @StreamListener(KafkaProcessor.INPUT)
+    public void wheneverReservationCanceled_PaymentCancelPolicy(@Payload ReservationCanceled reservationCanceled){
+
+        if(!reservationCanceled.validate()) return;
+
+        System.out.println("\n\n##### listener PaymentCancelPolicy : " + reservationCanceled.toJson() + "\n\n");
+
+        // 결제완료 상태를 결제취소 상태로 변경
+        paymentRepository.findById(reservationCanceled.getId())
+        .ifPresent(
+            payment -> {
+                payment.setReservStatus("Canceled");
+                paymentRepository.save(payment);
+            }    
+        );
+            
     }
 }
 ```
+- voucher 시스템에서는 결제완료 시 바우처를 승인 상태로 변경하였다 voucher 서비스 또한 개인 Final 과제 수행 시 구현 하였다. 
+- 결제완료 후 해당 예약의 바우처를 Approved 상태로 변경
+- 예약취소 시 결제취소 처리되며 해당 바우처 또한 Canceled 상태로 변경한다 
+
+바우처시스템
+
+```java
+@Service
+public class PolicyHandler{
+    @Autowired VoucherRepository voucherRepository;
+
+    @StreamListener(KafkaProcessor.INPUT)
+    public void wheneverPaymentApproved_VoucherRequestPolicy(@Payload PaymentApproved paymentApproved){
+
+        if(!paymentApproved.validate()) return;
+
+        System.out.println("\n\n##### listener VoucherRequestPolicy : " + paymentApproved.toJson() + "\n\n");
+
+        // 결제 후 바우처 발송
+        if (paymentApproved.getReservStatus().equals("Paid")){
+            
+            System.out.println("Paid accept");
+            Voucher voucher = new Voucher();
+            voucher.setId(paymentApproved.getReservId());
+            voucher.setReservId(paymentApproved.getReservId());
+            voucher.setVoucherCode(paymentApproved.getReservId()+"code");
+            voucher.setVoucherStatus("Approved");
+            voucherRepository.save(voucher);
+        }
+        
+            
+    }
+    @StreamListener(KafkaProcessor.INPUT)
+    public void wheneverPaymentCancelled_VoucherCancelPolicy(@Payload PaymentCancelled paymentCancelled){
+
+        if(!paymentCancelled.validate()) return;
+
+        System.out.println("\n\n##### listener VoucherCancelPolicy : " + paymentCancelled.toJson() + "\n\n");
+
+        // 결제취소 시 바우처 취소        
+        
+        voucherRepository.findByReservId(paymentCancelled.getReservId()) 
+        .ifPresent(
+            voucher -> {
+                if(paymentCancelled.getReservStatus().equals("Canceled")){
+                voucher.setVoucherStatus("Canceled");
+                voucherRepository.save(voucher);
+                }
+            }    
+        );
+            
+    }
+
+    @StreamListener(KafkaProcessor.INPUT)
+    public void whatever(@Payload String eventString){}
+
+}
+
+```
+
+-개인 Final 과제 수행 시 마이페이지에 결제상태와 바우처상태를 구독하여 조회 할 수 있도록 추가하였다. 
+
 마이페이지시스템
 ```java
 @Service
@@ -366,7 +527,7 @@ public class MyPageViewHandler {
     @Autowired
     private MyPageRepository myPageRepository;
 
-    @StreamListener(KafkaProcessor.INPUT)
+     @StreamListener(KafkaProcessor.INPUT)
     public void whenReservationRegistered_then_CREATE_1 (@Payload ReservationRegistered reservationRegistered) {
         try {
 
@@ -383,6 +544,7 @@ public class MyPageViewHandler {
             myPage.setResortType(reservationRegistered.getResortType());
             myPage.setResortPeriod(reservationRegistered.getResortPeriod());
             myPage.setResortPrice(reservationRegistered.getResortPrice());
+            myPage.setReservStatus(reservationRegistered.getResortStatus());
             // view 레파지 토리에 save
             myPageRepository.save(myPage);
         
@@ -390,24 +552,103 @@ public class MyPageViewHandler {
             e.printStackTrace();
         }
     }
+
+    @StreamListener(KafkaProcessor.INPUT)
+    public void whenPaymentRequested_then_UPDATE(@Payload PaymentRequested paymentRequested){
+        try{
+            if(!paymentRequested.validate()) return;
+
+            Optional<MyPage> myPageOptional = myPageRepository.findById(paymentRequested.getReservId());
+
+            if( myPageOptional.isPresent()){
+                 MyPage myPage = myPageOptional.get();
+                 myPage.setReservStatus(paymentRequested.getReservStatus());
+                 myPageRepository.save(myPage);
+            }
+
+        }catch (Exception e){
+            e.printStackTrace();
+        }
+    }
+
+    @StreamListener(KafkaProcessor.INPUT)
+    public void whenReservationCanceled_then_UPDATE_1(@Payload ReservationCanceled reservationCanceled) {
+        try {
+            if (!reservationCanceled.validate()) return;
+                // view 객체 조회
+            Optional<MyPage> myPageOptional = myPageRepository.findById(reservationCanceled.getId());
+            if( myPageOptional.isPresent()) {
+                MyPage myPage = myPageOptional.get();
+                // view 객체에 이벤트의 eventDirectValue 를 set 함
+                    myPage.setResortStatus(reservationCanceled.getResortStatus());
+                // view 레파지 토리에 save
+                myPageRepository.save(myPage);
+            }
+            
+        }catch (Exception e){
+            e.printStackTrace();
+        }
+    }
+
+    @StreamListener(KafkaProcessor.INPUT)
+    public void whenPaymentCancelled_then_UPDATE(@Payload PaymentCancelled paymentCancelled){
+        try{
+            if (!paymentCancelled.validate()) return;
+            
+            Optional<MyPage> myPageOptional = myPageRepository.findById(paymentCancelled.getReservId());
+
+            if( myPageOptional.isPresent()) {
+                MyPage myPage = myPageOptional.get();
+                myPage.setReservStatus(paymentCancelled.getReservStatus());
+                myPageRepository.save(myPage);
+            }
+
+        }catch (Exception e){
+            e.printStackTrace();
+        }
+    }
+
+     @StreamListener(KafkaProcessor.INPUT)
+     public void whenVoucherSend_then_UPDATE(@Payload VoucherSend voucherSend){
+         try{
+             if(!voucherSend.validate()) return;
+             
+             Optional<MyPage> myPageOptional = myPageRepository.findById(voucherSend.getReservId());
+
+             if( myPageOptional.isPresent()) {
+                MyPage myPage = myPageOptional.get();
+                myPage.setVoucherStatus(voucherSend.getVoucherStatus());
+                myPageRepository.save(myPage);
+             }   
+
+         }catch (Exception e){
+            e.printStackTrace();    
+         }
+     }
 }
 ```
-- 예약 시스템은 결제시스템/마이페이지 시스템과 완전히 분리되어있으며, 이벤트 수신에 따라 처리되기 때문에, 결제시스템/마이시스템이 유지보수로 인해 잠시 내려간 상태라도 예약을 받는데 문제가 없다
+- 예약 시스템은 바우처시스템/마이페이지 시스템과 완전히 분리되어있으며, 이벤트 수신에 따라 처리되기 때문에, 바우처시스템/마이시스템이 유지보수로 인해 잠시 내려간 상태라도 예약을 받는데 문제가 없다
 ```bash
-# 마이페이지 서비스는 잠시 셧다운 시키고 결제시스템은 현재 미구현
+# 마이페이지,바우처 서비스는 잠시 셧다운 시키고 예약이력 및 바우처 전송내용 확인 가능 
 
 1.리조트입력
 http localhost:8082/resorts resortName="Jeju" resortType="Hotel" resortPrice=100000 resortStatus="Available" resortPeriod="7/23~25"
 http localhost:8082/resorts resortName="Seoul" resortType="Hotel" resortPrice=100000 resortStatus="Available" resortPeriod="7/23~25"
 
 2.예약입력
-http localhost:8081/reservations resortId=2 memberName="sim sang joon" 
+http localhost:8081/reservations resortId=1 memberName="MK" 
 http localhost:8081/reservations #예약 정상 처리 확인
 
-3.마이페이지서비스 기동
+3.결제 
+http PATCH http://localhost:8084/payments/1 reservStatus="Paid"
 
-4.마이페이지확인
+4.마이페이지서비스 기동
+
+5.바우처서비스 기동
+
+6.마이페이지, 바우처서비스 확인
 http localhost:8083/myPages #정상적으로 마이페이지에서 예약 이력이 확인 됨
+http localhost:8085/vouchers #정상적으로 바우처이력이 확인 됨 
 
 ```
 
@@ -584,6 +825,143 @@ Shortest transaction:           1.33
 ![image](https://user-images.githubusercontent.com/58622901/125236603-40778c80-e31f-11eb-81a7-eeaa4863239d.png)
 
 ![image](https://user-images.githubusercontent.com/58622901/125236641-4ff6d580-e31f-11eb-8659-6886b5cfacc5.png)
+
+* 서킷 브레이크 프레임워크 : Spring FeignClient + Hystrix 옵션을 사용 (개인 Final) 
+
+- 시나리오 : 예약(reservation) -> 결제(payment) 예약 시 RESTful Request/Response 로 구현이 하였고, 예약 요청이 과도할 경우 circuit breaker 를 통하여 장애격리.
+- Hystrix 설정: 요청처리 쓰레드에서 처리시간이 610 밀리초가 넘어서기 시작하여 어느정도 유지되면 circuit breaker 수행됨
+
+```yaml
+# application.yml
+feign:
+  resort:
+    url: localhost:8082
+  payment:
+    url: localhost:8084
+  hystrix:
+    enabled: true 
+    
+hystrix:
+  command:
+    # 전역설정
+    default:
+      execution.isolation.thread.timeoutInMilliseconds: 610
+
+```
+
+피호출 서비스(결제:payment) 의 임의 부하 처리 - 400 밀리초 ~ 620밀리초의 지연시간 부여
+```java
+# (payment) PaymentController.java 
+
+@RequestMapping(method= RequestMethod.GET, value="/payments/{id}")
+public Payment getPaymentStatus(@PathVariable("id") Long id){
+       
+     //hystix test code
+       try {
+           Thread.currentThread().sleep((long) (400 + Math.random() * 220));
+       } catch (InterruptedException e) { }
+
+   return repository.findById(id).get();
+}
+
+# (reservation) PaymentServiceFallback.java 
+
+@Component
+public class PaymentServiceFallback implements PaymentService {
+
+    @Override
+    public Payment getPaymentStatus(Long id) {
+        System.out.println("Circuit breaker has been opened. Fallback returned instead.");
+        return null;
+    }
+
+}
+
+```
+부하테스터 siege 툴을 통한 서킷 브레이커 동작 확인 : 동시사용자 100명, 10초 동안 실시
+
+```bash
+$ http http://localhost:8082/resorts resortName="Jeju" resortType="Hotel" resortPrice=100000 resortStatus="Available" resortPeriod="7/23~25" -- 리조트등록
+$ http http://localhost:8084/payments reservStatus="Waiting for payment" -- 결제서비스 확인을 위한 임의의 값 세팅
+
+$ siege -v -c100 -t10S -r10 --content-type "application/json" 'http://localhost:8081/reservations/ POST {"resortId":1, "memberName":"MK"}' 
+
+** SIEGE 4.0.4
+** Preparing 100 concurrent users for battle.
+The server is now under siege...
+
+
+HTTP/1.1 201     3.55 secs:     362 bytes ==> POST http://localhost:8081/reservations/
+HTTP/1.1 201     3.57 secs:     362 bytes ==> POST http://localhost:8081/reservations/
+HTTP/1.1 201     3.75 secs:     364 bytes ==> POST http://localhost:8081/reservations/
+HTTP/1.1 201     3.87 secs:     364 bytes ==> POST http://localhost:8081/reservations/
+HTTP/1.1 201     4.10 secs:     343 bytes ==> POST http://localhost:8081/reservations/
+HTTP/1.1 201     4.11 secs:     343 bytes ==> POST http://localhost:8081/reservations/
+HTTP/1.1 201     4.12 secs:     343 bytes ==> POST http://localhost:8081/reservations/
+HTTP/1.1 201     4.16 secs:     343 bytes ==> POST http://localhost:8081/reservations/
+HTTP/1.1 201     4.20 secs:     343 bytes ==> POST http://localhost:8081/reservations/
+HTTP/1.1 201     4.20 secs:     343 bytes ==> POST http://localhost:8081/reservations/
+HTTP/1.1 201     4.28 secs:     343 bytes ==> POST http://localhost:8081/reservations/
+HTTP/1.1 201     4.46 secs:     343 bytes ==> POST http://localhost:8081/reservations/
+HTTP/1.1 201     4.63 secs:     343 bytes ==> POST http://localhost:8081/reservations/
+HTTP/1.1 201     4.70 secs:     343 bytes ==> POST http://localhost:8081/reservations/
+HTTP/1.1 201     4.74 secs:     343 bytes ==> POST http://localhost:8081/reservations/
+HTTP/1.1 201     4.83 secs:     343 bytes ==> POST http://localhost:8081/reservations/
+HTTP/1.1 201     4.82 secs:     343 bytes ==> POST http://localhost:8081/reservations/
+
+* 요청이 과도하여 Circuit breaker를 동작함 요청을 차단
+HTTP/1.1 500     4.94 secs:     255 bytes ==> POST http://localhost:8081/reservations/
+HTTP/1.1 500     4.95 secs:     255 bytes ==> POST http://localhost:8081/reservations/
+HTTP/1.1 500     5.14 secs:     255 bytes ==> POST http://localhost:8081/reservations/
+
+* 요청을 어느정도 돌려보내고나니, 기존에 밀린 일들이 처리되었고, 회로를 닫아 요청을 다시 받기 시작
+HTTP/1.1 201     5.25 secs:     343 bytes ==> POST http://localhost:8081/reservations/
+HTTP/1.1 201     5.30 secs:     343 bytes ==> POST http://localhost:8081/reservations/
+
+* 다시 요청이 쌓이기 시작하여 건당 처리시간이 지연됨 => 회로 열기 => 요청 실패처리
+HTTP/1.1 500     5.33 secs:     255 bytes ==> POST http://localhost:8081/reservations/
+HTTP/1.1 500     5.38 secs:     255 bytes ==> POST http://localhost:8081/reservations/
+
+* 이후 이러한 패턴이 계속 반복되면서 시스템은 도미노 현상이나 자원 소모의 폭주 없이 잘 운영됨
+HTTP/1.1 201     5.46 secs:     343 bytes ==> POST http://localhost:8081/reservations/
+HTTP/1.1 201     5.45 secs:     343 bytes ==> POST http://localhost:8081/reservations/
+HTTP/1.1 201     5.48 secs:     343 bytes ==> POST http://localhost:8081/reservations/
+HTTP/1.1 201     5.49 secs:     343 bytes ==> POST http://localhost:8081/reservations/
+HTTP/1.1 500     5.51 secs:     255 bytes ==> POST http://localhost:8081/reservations/
+HTTP/1.1 201     5.65 secs:     343 bytes ==> POST http://localhost:8081/reservations/
+HTTP/1.1 201     5.80 secs:     343 bytes ==> POST http://localhost:8081/reservations/
+HTTP/1.1 201     5.85 secs:     343 bytes ==> POST http://localhost:8081/reservations/
+HTTP/1.1 201     5.90 secs:     343 bytes ==> POST http://localhost:8081/reservations/
+HTTP/1.1 500     5.99 secs:     255 bytes ==> POST http://localhost:8081/reservations/
+HTTP/1.1 201     6.06 secs:     343 bytes ==> POST http://localhost:8081/reservations/
+HTTP/1.1 201     6.07 secs:     343 bytes ==> POST http://localhost:8081/reservations/
+HTTP/1.1 201     6.06 secs:     343 bytes ==> POST http://localhost:8081/reservations/
+HTTP/1.1 201     6.07 secs:     343 bytes ==> POST http://localhost:8081/reservations/
+HTTP/1.1 201     6.15 secs:     343 bytes ==> POST http://localhost:8081/reservations/
+HTTP/1.1 201     6.24 secs:     343 bytes ==> POST http://localhost:8081/reservations/
+
+Lifting the server siege...
+Transactions:                     93 hits
+Availability:                  80.87 %
+Elapsed time:                   9.86 secs
+Data transferred:               0.04 MB
+Response time:                  7.54 secs
+Transaction rate:               9.43 trans/sec
+Throughput:                     0.00 MB/sec
+Concurrency:                   71.08
+Successful transactions:          93
+Failed transactions:              22
+Longest transaction:            9.70
+Shortest transaction:           0.75
+
+```
+
+- siege 수행 결과
+
+![image](https://user-images.githubusercontent.com/58622901/126892772-2474f46c-ed49-4a65-a588-1053988b3f1f.png)
+
+![image](https://user-images.githubusercontent.com/58622901/126892825-0f881dfc-9879-43ad-83bc-8cd37054c9f9.png)
+
 
 
 ## 오토스케일 아웃
