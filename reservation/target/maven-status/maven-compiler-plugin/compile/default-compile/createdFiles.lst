@@ -6,7 +6,8 @@ resortreservation/config/kafka/KafkaProcessor.class
 resortreservation/external/ResortService.class
 resortreservation/PolicyHandler.class
 resortreservation/ReservationApplication.class
+resortreservation/external/ResortServiceFallback.class
 resortreservation/ReservationCanceled.class
 resortreservation/Reservation.class
-resortreservation/external/Resort.class
 resortreservation/AbstractEvent.class
+resortreservation/external/Resort.class

@@ -9,7 +9,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 
 import java.util.Date;
 
-@FeignClient(name="resort", url="${feign.resort.url}")
+@FeignClient(name="resort",contextId = "feignClientForResort", url="${feign.resort.url}",  fallback = ResortServiceFallback.class)
 public interface ResortService {
 
     //@PatchMapping(path="/resorts/{id}")

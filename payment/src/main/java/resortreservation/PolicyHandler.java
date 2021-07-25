@@ -18,12 +18,14 @@ public class PolicyHandler{
         if(!reservationRegistered.validate()) return;
 
         System.out.println("\n\n##### listener PaymentRequestPolicy : " + reservationRegistered.toJson() + "\n\n");
-
-        // Sample Logic //
-        Payment payment = new Payment();
-        paymentRepository.save(payment);
+        
+            Payment payment = new Payment();
+            payment.setReservId(reservationRegistered.getId());
+            payment.setReservStatus("Waiting for payment"); 
+            payment.setResortPrice(reservationRegistered.getResortPrice());
+            paymentRepository.save(payment);
             
-    }
+    } 
     @StreamListener(KafkaProcessor.INPUT)
     public void wheneverReservationCanceled_PaymentCancelPolicy(@Payload ReservationCanceled reservationCanceled){
 
@@ -31,9 +33,14 @@ public class PolicyHandler{
 
         System.out.println("\n\n##### listener PaymentCancelPolicy : " + reservationCanceled.toJson() + "\n\n");
 
-        // Sample Logic //
-        Payment payment = new Payment();
-        paymentRepository.save(payment);
+        // 결제완료 상태를 결제취소 상태로 변경
+        paymentRepository.findById(reservationCanceled.getId())
+        .ifPresent(
+            payment -> {
+                payment.setReservStatus("Canceled");
+                paymentRepository.save(payment);
+            }    
+        );
             
     }
 

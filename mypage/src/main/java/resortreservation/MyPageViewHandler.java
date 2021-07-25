@@ -34,6 +34,7 @@ public class MyPageViewHandler {
             myPage.setResortType(reservationRegistered.getResortType());
             myPage.setResortPeriod(reservationRegistered.getResortPeriod());
             myPage.setResortPrice(reservationRegistered.getResortPrice());
+            myPage.setReservStatus(reservationRegistered.getResortStatus());
             // view 레파지 토리에 save
             myPageRepository.save(myPage);
         
@@ -42,6 +43,23 @@ public class MyPageViewHandler {
         }
     }
 
+    @StreamListener(KafkaProcessor.INPUT)
+    public void whenPaymentRequested_then_UPDATE(@Payload PaymentRequested paymentRequested){
+        try{
+            if(!paymentRequested.validate()) return;
+
+            Optional<MyPage> myPageOptional = myPageRepository.findById(paymentRequested.getReservId());
+
+            if( myPageOptional.isPresent()){
+                 MyPage myPage = myPageOptional.get();
+                 myPage.setReservStatus(paymentRequested.getReservStatus());
+                 myPageRepository.save(myPage);
+            }
+
+        }catch (Exception e){
+            e.printStackTrace();
+        }
+    }
 
     @StreamListener(KafkaProcessor.INPUT)
     public void whenReservationCanceled_then_UPDATE_1(@Payload ReservationCanceled reservationCanceled) {
@@ -61,5 +79,41 @@ public class MyPageViewHandler {
             e.printStackTrace();
         }
     }
+
+    @StreamListener(KafkaProcessor.INPUT)
+    public void whenPaymentCancelled_then_UPDATE(@Payload PaymentCancelled paymentCancelled){
+        try{
+            if (!paymentCancelled.validate()) return;
+            
+            Optional<MyPage> myPageOptional = myPageRepository.findById(paymentCancelled.getReservId());
+
+            if( myPageOptional.isPresent()) {
+                MyPage myPage = myPageOptional.get();
+                myPage.setReservStatus(paymentCancelled.getReservStatus());
+                myPageRepository.save(myPage);
+            }
+
+        }catch (Exception e){
+            e.printStackTrace();
+        }
+    }
+
+     @StreamListener(KafkaProcessor.INPUT)
+     public void whenVoucherSend_then_UPDATE(@Payload VoucherSend voucherSend){
+         try{
+             if(!voucherSend.validate()) return;
+             
+             Optional<MyPage> myPageOptional = myPageRepository.findById(voucherSend.getReservId());
+
+             if( myPageOptional.isPresent()) {
+                MyPage myPage = myPageOptional.get();
+                myPage.setVoucherStatus(voucherSend.getVoucherStatus());
+                myPageRepository.save(myPage);
+             }   
+
+         }catch (Exception e){
+            e.printStackTrace();    
+         }
+     }
 
 }

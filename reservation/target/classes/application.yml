@@ -41,14 +41,19 @@ server:
 feign:
   resort:
     url: localhost:8082
+  #hystrix:
+  #  enabled: true
+  payment:
+    url: localhost:8084
   hystrix:
-    enabled: true
+    enabled: true  
 
 hystrix:
   command:
     # 전역설정
     default:
       execution.isolation.thread.timeoutInMilliseconds: 610
+
 
 ---
 

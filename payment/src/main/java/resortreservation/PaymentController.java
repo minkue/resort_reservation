@@ -11,5 +11,22 @@ import java.util.List;
 
  @RestController
  public class PaymentController {
+    // feign client test용 get method 
+    // private PaymentRepository repository;
+
+    // public PaymentController(PaymentRepository repository){
+    //     this.repository = repository;
+    // } 
+
+    //@RequestMapping(method= RequestMethod.GET, value="/payments/{id}")
+    //public Payment getPaymentStatus(@PathVariable("id") Long id){
+       
+        //hystix test code
+        //     try {
+        //         Thread.currentThread().sleep((long) (400 + Math.random() * 220));
+        //     } catch (InterruptedException e) { }
+
+     //       return repository.findById(id).get();
+    //}
 
  }

@@ -19,9 +19,18 @@ public class PolicyHandler{
 
         System.out.println("\n\n##### listener VoucherRequestPolicy : " + paymentApproved.toJson() + "\n\n");
 
-        // Sample Logic //
-        Voucher voucher = new Voucher();
-        voucherRepository.save(voucher);
+        // 결제 후 바우처 발송
+        if (paymentApproved.getReservStatus().equals("Paid")){
+            
+            System.out.println("Paid accept");
+            Voucher voucher = new Voucher();
+            voucher.setId(paymentApproved.getReservId());
+            voucher.setReservId(paymentApproved.getReservId());
+            voucher.setVoucherCode(paymentApproved.getReservId()+"code");
+            voucher.setVoucherStatus("Approved");
+            voucherRepository.save(voucher);
+        }
+        
             
     }
     @StreamListener(KafkaProcessor.INPUT)
@@ -31,9 +40,17 @@ public class PolicyHandler{
 
         System.out.println("\n\n##### listener VoucherCancelPolicy : " + paymentCancelled.toJson() + "\n\n");
 
-        // Sample Logic //
-        Voucher voucher = new Voucher();
-        voucherRepository.save(voucher);
+        // 결제취소 시 바우처 취소        
+        
+        voucherRepository.findByReservId(paymentCancelled.getReservId()) 
+        .ifPresent(
+            voucher -> {
+                if(paymentCancelled.getReservStatus().equals("Canceled")){
+                voucher.setVoucherStatus("Canceled");
+                voucherRepository.save(voucher);
+                }
+            }    
+        );
             
     }
 
