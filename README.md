@@ -84,8 +84,11 @@
 
 <img width="994" alt="image" src="https://user-images.githubusercontent.com/85722729/125240556-3bb5d700-e325-11eb-9bcf-d9c4d4d08e32.png">
 
+### 추가 과제 구현시 수정된 커맨드 추가 (결제시스템 상태조회)
+![image](https://user-images.githubusercontent.com/58622901/126890676-b2b1b931-b146-4896-9da5-bff07a677144.png)
+
 ### 완성된 모형
-<img width="1113" alt="image" src="https://user-images.githubusercontent.com/85722851/125246650-0614ec00-e32d-11eb-8129-963e5dab211d.png">
+![image](https://user-images.githubusercontent.com/58622901/126890353-31e6ea20-e0cb-49b1-a4ed-5a0e62224d19.png)
 
 - View Model 추가
 - 도메인 서열
