@@ -355,6 +355,44 @@ public interface ResortService {
 - 또한 과도한 요청시에 서비스 장애가 도미노 처럼 벌어질 수 있다. (서킷브레이커, 폴백 처리는 운영단계에서 설명한다.)
 
 
+- 개인 Final 과제 수행 시에는 예약(reservation)->결제서비스상태확인(payment) 호출을 추가하여 동기식 일관성을 유지하는 트랜잭션을 구현하여 처리하였다. 호출 프로토콜은 이미 앞서 Rest Repository 에 의해 노출되어있는 REST 서비스를 FeignClient를 이용하여 호출하였다
+
+- 결제서비스를 호출하기 위하여 Stub과 (FeignClient) 를 이용하여 Service 대행 인터페이스 (Proxy) 를 구현하였다
+- 기존에 resort 서비스의 feignClient와 충돌이 나지 않기위해 각각 contextId를 부여하였다 (resortServicedml contextId는 feignClientForResort이다.
+
+```java
+# (reservation) PaymentService.java
+
+package resortreservation.external;
+
+@FeignClient(name="payment",contextId = "feignClientForPayment", url="${feign.payment.url}",  fallback = PaymentServiceFallback.class)
+public interface PaymentService {
+
+    @RequestMapping(method= RequestMethod.GET, value="/payments/{id}", consumes = "application/json")
+    public Payment getPaymentStatus(@PathVariable("id") Long id);
+
+}
+```
+- 예약을 처리 하기 직전(@PrePersist)에 PaymentSevice를 호출하여 서비스 상태를 가져온다.
+```java
+# Reservation.java (Entity)
+
+    @PrePersist
+    public void onPrePersist() throws Exception {
+        resortreservation.external.Payment payment = new resortreservation.external.Payment();
+        
+        System.out.print("#######paymentId="+payment);
+        //Payment 서비스에서 Payment의 상태를 가져옴
+        payment = ReservationApplication.applicationContext.getBean(resortreservation.external.PaymentService.class).getPaymentStatus(test);
+        
+         fallback 시 payment null return
+           if (payment == null){ 
+               throw new Exception("The payment is not in a usable status.");
+           }   
+    }
+```
+- 동기식 호출에서는 호출 시간에 따른 타임 커플링이 발생하며, 시스템이 장애로 예약을 못받는다는 것을 확인
+
 
 
 ## 비동기식 호출 / 시간적 디커플링 / 장애격리 / 최종 (Eventual) 일관성 테스트
