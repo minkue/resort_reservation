@@ -97,9 +97,12 @@
   - General : payment, voucher
 
 ## 헥사고날 아키텍처 다이어그램 도출
-    
+
+- 팀과제 수행 시
 ![image](https://user-images.githubusercontent.com/85722729/125151798-bcd56880-e183-11eb-876b-074a02d94116.png)
 
+- 개인Final 수행 시 아키텍처 
+![image](https://user-images.githubusercontent.com/58622901/126893828-66de55e9-51a3-4fed-b584-6a0270556360.png)
 
 
     - Chris Richardson, MSA Patterns 참고하여 Inbound adaptor와 Outbound adaptor를 구분함
