@@ -172,13 +172,16 @@ http aa9c6a809425d45b69b139edc5237d53-1942883713.ap-northeast-2.elb.amazonaws.co
 ## Gateway 적용
 - API GateWay를 통하여 마이크로 서비스들의 진입점을 통일할 수 있다. 
 다음과 같이 GateWay를 적용하였다.
+- 개인과제 구현 시 추가된 payment, voucher 서비스를 yaml 파일에 추가하여 구현 하였다. 
 
 ```yaml
 - gateway 서비스의 application.yml
 
 server:
   port: 8088
+
 ---
+
 spring:
   profiles: default
   cloud:
@@ -196,6 +199,14 @@ spring:
           uri: http://localhost:8083
           predicates:
             - Path= /myPages/**
+        - id: payment
+          uri: http://localhost:8084
+          predicates:
+            - Path=/payments/** 
+        - id: voucher
+          uri: http://localhost:8085
+          predicates:
+            - Path=/vouchers/** 
       globalcors:
         corsConfigurations:
           '[/**]':
@@ -206,7 +217,10 @@ spring:
             allowedHeaders:
               - "*"
             allowCredentials: true
+
+
 ---
+
 spring:
   profiles: docker
   cloud:
@@ -224,6 +238,14 @@ spring:
           uri: http://mypage:8080
           predicates:
             - Path= /myPages/**
+        - id: payment
+          uri: http://payment:8080
+          predicates:
+            - Path=/payments/** 
+        - id: voucher
+          uri: http://voucher:8080
+          predicates:
+            - Path=/vouchers/** 
       globalcors:
         corsConfigurations:
           '[/**]':
@@ -234,6 +256,7 @@ spring:
             allowedHeaders:
               - "*"
             allowCredentials: true
+
 server:
   port: 8080
 ```
