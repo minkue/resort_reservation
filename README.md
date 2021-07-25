@@ -588,6 +588,143 @@ Shortest transaction:           1.33
 
 ![image](https://user-images.githubusercontent.com/58622901/125236641-4ff6d580-e31f-11eb-8659-6886b5cfacc5.png)
 
+* 서킷 브레이크 프레임워크 : Spring FeignClient + Hystrix 옵션을 사용 (개인 Final) 
+
+- 시나리오 : 예약(reservation) -> 결제(payment) 예약 시 RESTful Request/Response 로 구현이 하였고, 예약 요청이 과도할 경우 circuit breaker 를 통하여 장애격리.
+Hystrix 설정: 요청처리 쓰레드에서 처리시간이 610 밀리초가 넘어서기 시작하여 어느정도 유지되면 circuit breaker 수행됨
+
+```yaml
+# application.yml
+feign:
+  resort:
+    url: localhost:8082
+  payment:
+    url: localhost:8084
+  hystrix:
+    enabled: true 
+    
+hystrix:
+  command:
+    # 전역설정
+    default:
+      execution.isolation.thread.timeoutInMilliseconds: 610
+
+```
+
+피호출 서비스(결제:payment) 의 임의 부하 처리 - 400 밀리초 ~ 620밀리초의 지연시간 부여
+```java
+# (payment) PaymentController.java 
+
+@RequestMapping(method= RequestMethod.GET, value="/payments/{id}")
+public Payment getPaymentStatus(@PathVariable("id") Long id){
+       
+     //hystix test code
+       try {
+           Thread.currentThread().sleep((long) (400 + Math.random() * 220));
+       } catch (InterruptedException e) { }
+
+   return repository.findById(id).get();
+}
+
+# (reservation) PaymentServiceFallback.java 
+
+@Component
+public class PaymentServiceFallback implements PaymentService {
+
+    @Override
+    public Payment getPaymentStatus(Long id) {
+        System.out.println("Circuit breaker has been opened. Fallback returned instead.");
+        return null;
+    }
+
+}
+
+```
+부하테스터 siege 툴을 통한 서킷 브레이커 동작 확인 : 동시사용자 100명, 10초 동안 실시
+
+```bash
+$ http http://localhost:8082/resorts resortName="Jeju" resortType="Hotel" resortPrice=100000 resortStatus="Available" resortPeriod="7/23~25" -- 리조트등록
+$ http http://localhost:8084/payments reservStatus="Waiting for payment" -- 결제서비스 확인을 위한 임의의 값 세팅
+
+$ siege -v -c100 -t10S -r10 --content-type "application/json" 'http://localhost:8081/reservations/ POST {"resortId":1, "memberName":"MK"}' 
+
+** SIEGE 4.0.4
+** Preparing 100 concurrent users for battle.
+The server is now under siege...
+
+
+HTTP/1.1 201     3.55 secs:     362 bytes ==> POST http://localhost:8081/reservations/
+HTTP/1.1 201     3.57 secs:     362 bytes ==> POST http://localhost:8081/reservations/
+HTTP/1.1 201     3.75 secs:     364 bytes ==> POST http://localhost:8081/reservations/
+HTTP/1.1 201     3.87 secs:     364 bytes ==> POST http://localhost:8081/reservations/
+HTTP/1.1 201     4.10 secs:     343 bytes ==> POST http://localhost:8081/reservations/
+HTTP/1.1 201     4.11 secs:     343 bytes ==> POST http://localhost:8081/reservations/
+HTTP/1.1 201     4.12 secs:     343 bytes ==> POST http://localhost:8081/reservations/
+HTTP/1.1 201     4.16 secs:     343 bytes ==> POST http://localhost:8081/reservations/
+HTTP/1.1 201     4.20 secs:     343 bytes ==> POST http://localhost:8081/reservations/
+HTTP/1.1 201     4.20 secs:     343 bytes ==> POST http://localhost:8081/reservations/
+HTTP/1.1 201     4.28 secs:     343 bytes ==> POST http://localhost:8081/reservations/
+HTTP/1.1 201     4.46 secs:     343 bytes ==> POST http://localhost:8081/reservations/
+HTTP/1.1 201     4.63 secs:     343 bytes ==> POST http://localhost:8081/reservations/
+HTTP/1.1 201     4.70 secs:     343 bytes ==> POST http://localhost:8081/reservations/
+HTTP/1.1 201     4.74 secs:     343 bytes ==> POST http://localhost:8081/reservations/
+HTTP/1.1 201     4.83 secs:     343 bytes ==> POST http://localhost:8081/reservations/
+HTTP/1.1 201     4.82 secs:     343 bytes ==> POST http://localhost:8081/reservations/
+
+* 요청이 과도하여 Circuit breaker를 동작함 요청을 차단
+HTTP/1.1 500     4.94 secs:     255 bytes ==> POST http://localhost:8081/reservations/
+HTTP/1.1 500     4.95 secs:     255 bytes ==> POST http://localhost:8081/reservations/
+HTTP/1.1 500     5.14 secs:     255 bytes ==> POST http://localhost:8081/reservations/
+
+* 요청을 어느정도 돌려보내고나니, 기존에 밀린 일들이 처리되었고, 회로를 닫아 요청을 다시 받기 시작
+HTTP/1.1 201     5.25 secs:     343 bytes ==> POST http://localhost:8081/reservations/
+HTTP/1.1 201     5.30 secs:     343 bytes ==> POST http://localhost:8081/reservations/
+
+* 다시 요청이 쌓이기 시작하여 건당 처리시간이 지연됨 => 회로 열기 => 요청 실패처리
+HTTP/1.1 500     5.33 secs:     255 bytes ==> POST http://localhost:8081/reservations/
+HTTP/1.1 500     5.38 secs:     255 bytes ==> POST http://localhost:8081/reservations/
+
+* 이후 이러한 패턴이 계속 반복되면서 시스템은 도미노 현상이나 자원 소모의 폭주 없이 잘 운영됨
+HTTP/1.1 201     5.46 secs:     343 bytes ==> POST http://localhost:8081/reservations/
+HTTP/1.1 201     5.45 secs:     343 bytes ==> POST http://localhost:8081/reservations/
+HTTP/1.1 201     5.48 secs:     343 bytes ==> POST http://localhost:8081/reservations/
+HTTP/1.1 201     5.49 secs:     343 bytes ==> POST http://localhost:8081/reservations/
+HTTP/1.1 500     5.51 secs:     255 bytes ==> POST http://localhost:8081/reservations/
+HTTP/1.1 201     5.65 secs:     343 bytes ==> POST http://localhost:8081/reservations/
+HTTP/1.1 201     5.80 secs:     343 bytes ==> POST http://localhost:8081/reservations/
+HTTP/1.1 201     5.85 secs:     343 bytes ==> POST http://localhost:8081/reservations/
+HTTP/1.1 201     5.90 secs:     343 bytes ==> POST http://localhost:8081/reservations/
+HTTP/1.1 500     5.99 secs:     255 bytes ==> POST http://localhost:8081/reservations/
+HTTP/1.1 201     6.06 secs:     343 bytes ==> POST http://localhost:8081/reservations/
+HTTP/1.1 201     6.07 secs:     343 bytes ==> POST http://localhost:8081/reservations/
+HTTP/1.1 201     6.06 secs:     343 bytes ==> POST http://localhost:8081/reservations/
+HTTP/1.1 201     6.07 secs:     343 bytes ==> POST http://localhost:8081/reservations/
+HTTP/1.1 201     6.15 secs:     343 bytes ==> POST http://localhost:8081/reservations/
+HTTP/1.1 201     6.24 secs:     343 bytes ==> POST http://localhost:8081/reservations/
+
+Lifting the server siege...
+Transactions:                     93 hits
+Availability:                  80.87 %
+Elapsed time:                   9.86 secs
+Data transferred:               0.04 MB
+Response time:                  7.54 secs
+Transaction rate:               9.43 trans/sec
+Throughput:                     0.00 MB/sec
+Concurrency:                   71.08
+Successful transactions:          93
+Failed transactions:              22
+Longest transaction:            9.70
+Shortest transaction:           0.75
+
+```
+
+- siege 수행 결과
+
+![image](https://user-images.githubusercontent.com/58622901/126892772-2474f46c-ed49-4a65-a588-1053988b3f1f.png)
+
+![image](https://user-images.githubusercontent.com/58622901/126892825-0f881dfc-9879-43ad-83bc-8cd37054c9f9.png)
+
+
 
 ## 오토스케일 아웃
 - 앞서 CB 는 시스템을 안정되게 운영할 수 있게 해줬지만 사용자의 요청을 100% 받아들여주지 못했기 때문에 이에 대한 보완책으로 자동화된 확장 기능을 적용하고자 한다. 
