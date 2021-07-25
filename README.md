@@ -352,7 +352,6 @@ public interface ResortService {
 <img width="1019" alt="image" src="https://user-images.githubusercontent.com/85722851/125232225-2174fc80-e317-11eb-9186-98995cf27f97.png">
 
 
-- 또한 과도한 요청시에 서비스 장애가 도미노 처럼 벌어질 수 있다. (서킷브레이커, 폴백 처리는 운영단계에서 설명한다.)
 
 
 - 개인 Final 과제 수행 시에는 예약(reservation)->결제서비스상태확인(payment) 호출을 추가하여 동기식 일관성을 유지하는 트랜잭션을 구현하여 처리하였다. 호출 프로토콜은 이미 앞서 Rest Repository 에 의해 노출되어있는 REST 서비스를 FeignClient를 이용하여 호출하였다
@@ -394,6 +393,7 @@ public interface PaymentService {
 - 동기식 호출에서는 호출 시간에 따른 타임 커플링이 발생하며, 시스템이 장애로 예약을 못받는다는 것을 확인
 ![image](https://user-images.githubusercontent.com/58622901/126894995-c594adcf-9889-427a-8204-d058ef9941eb.png)
 
+- 또한 과도한 요청시에 서비스 장애가 도미노 처럼 벌어질 수 있다. (서킷브레이커, 폴백 처리는 운영단계에서 설명한다.)
 
 ## 비동기식 호출 / 시간적 디커플링 / 장애격리 / 최종 (Eventual) 일관성 테스트
 - 예약이 이루어진 후에 결제시스템에 결제요청과 마이페이지시스템에 이력을 보내는 행위는 동기식이 아니라 비 동기식으로 처리하여 예약이 블로킹 되지 않아도록 처리한다.
