@@ -261,9 +261,10 @@ server:
   port: 8080
 ```
 ## 폴리글랏 퍼시스턴스
-- CQRS 를 위한 mypage 서비스만 DB를 구분하여 적용함. 인메모리 DB인 hsqldb 사용.
+- 팀과제 구현 시 : CQRS 를 위한 mypage 서비스만 DB를 구분하여 적용함. 인메모리 DB인 hsqldb 사용.
+- 개인과제 구현 시 : voucher 전송을 위한 voucher 서비스만 DB를 구분하여 적용하였다. 인메모리 DB인 hsqldb를 사용하였고 mypage는 h2 db로 변경하였다.
 ```
-- maypage 서비스의 pom.xml
+- voucher 서비스의 pom.xml
 <!-- 
     <dependency>
         <groupId>com.h2database</groupId>
@@ -278,6 +279,8 @@ server:
         <scope>runtime</scope>
     </dependency>
 ```
+
+
 ## CQRS & Kafka
 - 타 마이크로서비스의 데이터 원본에 접근없이 내 서비스의 화면 구성과 잦은 조회가 가능하게 mypage에 CQRS 구현하였다.
 - 모든 정보는 비동기 방식으로 발행된 이벤트(예약, 예약취소, 가능상태변경)를 수신하여 처리된다.
