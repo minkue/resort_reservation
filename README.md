@@ -392,7 +392,7 @@ public interface PaymentService {
     }
 ```
 - 동기식 호출에서는 호출 시간에 따른 타임 커플링이 발생하며, 시스템이 장애로 예약을 못받는다는 것을 확인
-
+![image](https://user-images.githubusercontent.com/58622901/126894995-c594adcf-9889-427a-8204-d058ef9941eb.png)
 
 
 ## 비동기식 호출 / 시간적 디커플링 / 장애격리 / 최종 (Eventual) 일관성 테스트
