@@ -396,8 +396,8 @@ public interface PaymentService {
 - 또한 과도한 요청시에 서비스 장애가 도미노 처럼 벌어질 수 있다. (서킷브레이커, 폴백 처리는 운영단계에서 설명한다.)
 
 ## 비동기식 호출 / 시간적 디커플링 / 장애격리 / 최종 (Eventual) 일관성 테스트
-- 예약이 이루어진 후에 결제시스템에 결제요청과 마이페이지시스템에 이력을 보내는 행위는 동기식이 아니라 비 동기식으로 처리하여 예약이 블로킹 되지 않아도록 처리한다.
-- 이를 위하여 예약기록을 남긴 후에 곧바로 예약완료가 되었다는 도메인 이벤트를 카프카로 송출한다(Publish)
+
+- 예약기록을 남긴 후에 곧바로 예약완료가 되었다는 도메인 이벤트를 카프카로 송출한다(Publish)
  
 ```java
 @Entity
@@ -413,9 +413,11 @@ public class Reservation {
     }
 }
 ```
-- 결제시스템과 마이페이지시스템에서는 예약완료 이벤트에 대해서 이를 수신하여 자신의 정책을 처리하도록 PolicyHandler 를 구현한다
+- 결제시스템과 바우처시스템, 마이페이지시스템에서는 예약완료,결제완료 이벤트에 대해서 이를 수신하여 자신의 정책을 처리하도록 PolicyHandler 를 구현한다
 
-결제시스템(팀과제에서는 미구현)
+결제시스템(팀과제에서는 미구현) --> 개인 Final 과제 수행 시 구현
+- 예약완료 후 결제대기 상태로 payment 객체를 생성한다.
+- 예약취소 후 결제상태를 Canceled로 변경 한다
 ```java
 
 @Service
@@ -426,11 +428,97 @@ public class PolicyHandler{
     public void wheneverReservationRegistered_PaymentRequestPolicy(@Payload ReservationRegistered reservationRegistered){
 
         if(!reservationRegistered.validate()) return;
+
         System.out.println("\n\n##### listener PaymentRequestPolicy : " + reservationRegistered.toJson() + "\n\n");
-        // Logic 구성 // 
+        
+            Payment payment = new Payment();
+            payment.setReservId(reservationRegistered.getId());
+            payment.setReservStatus("Waiting for payment"); 
+            payment.setResortPrice(reservationRegistered.getResortPrice());
+            paymentRepository.save(payment);
+            
+    }
+    @StreamListener(KafkaProcessor.INPUT)
+    public void wheneverReservationCanceled_PaymentCancelPolicy(@Payload ReservationCanceled reservationCanceled){
+
+        if(!reservationCanceled.validate()) return;
+
+        System.out.println("\n\n##### listener PaymentCancelPolicy : " + reservationCanceled.toJson() + "\n\n");
+
+        // 결제완료 상태를 결제취소 상태로 변경
+        paymentRepository.findById(reservationCanceled.getId())
+        .ifPresent(
+            payment -> {
+                payment.setReservStatus("Canceled");
+                paymentRepository.save(payment);
+            }    
+        );
+            
     }
 }
 ```
+- voucher 시스템에서는 결제완료 시 바우처를 승인 상태로 변경하였다 voucher 서비스 또한 개인 Final 과제 수행 시 구현 하였다. 
+- 결제완료 후 해당 예약의 바우처를 Approved 상태로 변경
+- 예약취소 시 결제취소 처리되며 해당 바우처 또한 Canceled 상태로 변경한다 
+
+바우처시스템
+
+```java
+@Service
+public class PolicyHandler{
+    @Autowired VoucherRepository voucherRepository;
+
+    @StreamListener(KafkaProcessor.INPUT)
+    public void wheneverPaymentApproved_VoucherRequestPolicy(@Payload PaymentApproved paymentApproved){
+
+        if(!paymentApproved.validate()) return;
+
+        System.out.println("\n\n##### listener VoucherRequestPolicy : " + paymentApproved.toJson() + "\n\n");
+
+        // 결제 후 바우처 발송
+        if (paymentApproved.getReservStatus().equals("Paid")){
+            
+            System.out.println("Paid accept");
+            Voucher voucher = new Voucher();
+            voucher.setId(paymentApproved.getReservId());
+            voucher.setReservId(paymentApproved.getReservId());
+            voucher.setVoucherCode(paymentApproved.getReservId()+"code");
+            voucher.setVoucherStatus("Approved");
+            voucherRepository.save(voucher);
+        }
+        
+            
+    }
+    @StreamListener(KafkaProcessor.INPUT)
+    public void wheneverPaymentCancelled_VoucherCancelPolicy(@Payload PaymentCancelled paymentCancelled){
+
+        if(!paymentCancelled.validate()) return;
+
+        System.out.println("\n\n##### listener VoucherCancelPolicy : " + paymentCancelled.toJson() + "\n\n");
+
+        // 결제취소 시 바우처 취소        
+        
+        voucherRepository.findByReservId(paymentCancelled.getReservId()) 
+        .ifPresent(
+            voucher -> {
+                if(paymentCancelled.getReservStatus().equals("Canceled")){
+                voucher.setVoucherStatus("Canceled");
+                voucherRepository.save(voucher);
+                }
+            }    
+        );
+            
+    }
+
+    @StreamListener(KafkaProcessor.INPUT)
+    public void whatever(@Payload String eventString){}
+
+}
+
+```
+
+-개인 Final 과제 수행 시 마이페이지에 결제상태와 바우처상태를 구독하여 조회 할 수 있도록 추가하였다. 
+
 마이페이지시스템
 ```java
 @Service
@@ -439,7 +527,7 @@ public class MyPageViewHandler {
     @Autowired
     private MyPageRepository myPageRepository;
 
-    @StreamListener(KafkaProcessor.INPUT)
+     @StreamListener(KafkaProcessor.INPUT)
     public void whenReservationRegistered_then_CREATE_1 (@Payload ReservationRegistered reservationRegistered) {
         try {
 
@@ -456,6 +544,7 @@ public class MyPageViewHandler {
             myPage.setResortType(reservationRegistered.getResortType());
             myPage.setResortPeriod(reservationRegistered.getResortPeriod());
             myPage.setResortPrice(reservationRegistered.getResortPrice());
+            myPage.setReservStatus(reservationRegistered.getResortStatus());
             // view 레파지 토리에 save
             myPageRepository.save(myPage);
         
@@ -463,24 +552,103 @@ public class MyPageViewHandler {
             e.printStackTrace();
         }
     }
+
+    @StreamListener(KafkaProcessor.INPUT)
+    public void whenPaymentRequested_then_UPDATE(@Payload PaymentRequested paymentRequested){
+        try{
+            if(!paymentRequested.validate()) return;
+
+            Optional<MyPage> myPageOptional = myPageRepository.findById(paymentRequested.getReservId());
+
+            if( myPageOptional.isPresent()){
+                 MyPage myPage = myPageOptional.get();
+                 myPage.setReservStatus(paymentRequested.getReservStatus());
+                 myPageRepository.save(myPage);
+            }
+
+        }catch (Exception e){
+            e.printStackTrace();
+        }
+    }
+
+    @StreamListener(KafkaProcessor.INPUT)
+    public void whenReservationCanceled_then_UPDATE_1(@Payload ReservationCanceled reservationCanceled) {
+        try {
+            if (!reservationCanceled.validate()) return;
+                // view 객체 조회
+            Optional<MyPage> myPageOptional = myPageRepository.findById(reservationCanceled.getId());
+            if( myPageOptional.isPresent()) {
+                MyPage myPage = myPageOptional.get();
+                // view 객체에 이벤트의 eventDirectValue 를 set 함
+                    myPage.setResortStatus(reservationCanceled.getResortStatus());
+                // view 레파지 토리에 save
+                myPageRepository.save(myPage);
+            }
+            
+        }catch (Exception e){
+            e.printStackTrace();
+        }
+    }
+
+    @StreamListener(KafkaProcessor.INPUT)
+    public void whenPaymentCancelled_then_UPDATE(@Payload PaymentCancelled paymentCancelled){
+        try{
+            if (!paymentCancelled.validate()) return;
+            
+            Optional<MyPage> myPageOptional = myPageRepository.findById(paymentCancelled.getReservId());
+
+            if( myPageOptional.isPresent()) {
+                MyPage myPage = myPageOptional.get();
+                myPage.setReservStatus(paymentCancelled.getReservStatus());
+                myPageRepository.save(myPage);
+            }
+
+        }catch (Exception e){
+            e.printStackTrace();
+        }
+    }
+
+     @StreamListener(KafkaProcessor.INPUT)
+     public void whenVoucherSend_then_UPDATE(@Payload VoucherSend voucherSend){
+         try{
+             if(!voucherSend.validate()) return;
+             
+             Optional<MyPage> myPageOptional = myPageRepository.findById(voucherSend.getReservId());
+
+             if( myPageOptional.isPresent()) {
+                MyPage myPage = myPageOptional.get();
+                myPage.setVoucherStatus(voucherSend.getVoucherStatus());
+                myPageRepository.save(myPage);
+             }   
+
+         }catch (Exception e){
+            e.printStackTrace();    
+         }
+     }
 }
 ```
-- 예약 시스템은 결제시스템/마이페이지 시스템과 완전히 분리되어있으며, 이벤트 수신에 따라 처리되기 때문에, 결제시스템/마이시스템이 유지보수로 인해 잠시 내려간 상태라도 예약을 받는데 문제가 없다
+- 예약 시스템은 바우처시스템/마이페이지 시스템과 완전히 분리되어있으며, 이벤트 수신에 따라 처리되기 때문에, 바우처시스템/마이시스템이 유지보수로 인해 잠시 내려간 상태라도 예약을 받는데 문제가 없다
 ```bash
-# 마이페이지 서비스는 잠시 셧다운 시키고 결제시스템은 현재 미구현
+# 마이페이지,바우처 서비스는 잠시 셧다운 시키고 예약이력 및 바우처 전송내용 확인 가능 
 
 1.리조트입력
 http localhost:8082/resorts resortName="Jeju" resortType="Hotel" resortPrice=100000 resortStatus="Available" resortPeriod="7/23~25"
 http localhost:8082/resorts resortName="Seoul" resortType="Hotel" resortPrice=100000 resortStatus="Available" resortPeriod="7/23~25"
 
 2.예약입력
-http localhost:8081/reservations resortId=2 memberName="sim sang joon" 
+http localhost:8081/reservations resortId=1 memberName="MK" 
 http localhost:8081/reservations #예약 정상 처리 확인
 
-3.마이페이지서비스 기동
+3.결제 
+http PATCH http://localhost:8084/payments/1 reservStatus="Paid"
 
-4.마이페이지확인
+4.마이페이지서비스 기동
+
+5.바우처서비스 기동
+
+6.마이페이지, 바우처서비스 확인
 http localhost:8083/myPages #정상적으로 마이페이지에서 예약 이력이 확인 됨
+http localhost:8085/vouchers #정상적으로 바우처이력이 확인 됨 
 
 ```
 
