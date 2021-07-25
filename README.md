@@ -164,6 +164,8 @@ http aa9c6a809425d45b69b139edc5237d53-1942883713.ap-northeast-2.elb.amazonaws.co
 |reservation| 예약정보 관리 |8081|http://localhost:8081/reservations|
 |resort| 리조트 관리 |8082|http://localhost:8082/resorts|
 |mypage| 예약내역 조회 |8083|http://localhost:8083/mypages|
+|payment| 예약내역 결제 |8084|http://localhost:8084/payments|
+|voucher| 바우처 전송 |8085|http://localhost:8085/vouchers|
 |gateway| gateway |8088|http://localhost:8088|
 
 ## Gateway 적용
