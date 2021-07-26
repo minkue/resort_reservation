@@ -1073,21 +1073,21 @@ siege -c40 -t60S -v http://payment:8080/payments
 ```
 ![image](https://user-images.githubusercontent.com/58622901/126938909-0fcc3f70-fb11-4b2a-bef7-c90f73480b8b.png)
 
-- seige 수행 후 payment 시스템의 pod가 3개까지 scale out 된 것을 확인 할 수 있다.:
+- seige 수행 후 payment 시스템의 pod가 3개까지 scale out 된 것을 확인 할 수 있다.
 ![image](https://user-images.githubusercontent.com/58622901/126938755-9d68a751-fa2c-4247-9f59-08b28f1cfaa9.png)
 
 
 ## Zero-Downtime deploy (Readiness Probe)
-- 먼저 무정지 재배포가 100% 되는 것인지 확인하기 위해서 Autoscaler 이나 CB 설정을 제거하고 테스트함
+- 먼저 무정지 재배포가 100% 되는 것인지 확인하기 위해서 Autoscaler 이나 Circuit Breaker 설정을 제거하고 테스트함
 - seige로 배포중에 부하를 발생과 재배포 실행
 ```bash
-root@siege:/# siege -c1 -t30S -v http://resort:8080/resorts 
+root@siege:/# siege -c1 -t30S -v http://payment:8080/payments
 kubectl apply -f  kubernetes/deployment.yml 
 ```
 - seige 의 화면으로 넘어가서 Availability 가 100% 미만으로 떨어졌는지 확인
+![image](https://user-images.githubusercontent.com/58622901/126941881-840072bd-e60b-41db-add8-40fc6a22476e.png)
 
-<img width="552" alt="image" src="https://user-images.githubusercontent.com/85722851/125045082-922dd600-e0d7-11eb-9128-4c9eff39654c.png">
-배포기간중 Availability 가 평소 100%에서 80% 대로 떨어지는 것을 확인. 원인은 쿠버네티스가 성급하게 새로 올려진 서비스를 READY 상태로 인식하여 서비스 유입을 진행한 것이기 때문. 
+배포기간중 Availability 가 평소 100%에서 36%로 떨어지는 것을 확인. 원인은 쿠버네티스가 성급하게 새로 올려진 서비스를 READY 상태로 인식하여 서비스 유입을 진행한 것이기 때문. 
 
 - 이를 막기위해 Readiness Probe 를 설정함: deployment.yaml 의 readiness probe 추가
 ```yml
@@ -1102,7 +1102,7 @@ kubectl apply -f  kubernetes/deployment.yml
 ```
 
 - 동일한 시나리오로 재배포 한 후 Availability 확인
-<img width="503" alt="image" src="https://user-images.githubusercontent.com/85722851/125044747-3cf1c480-e0d7-11eb-9c35-1091547bb099.png">
+![image](https://user-images.githubusercontent.com/58622901/126942146-bdbd101b-e715-4b25-b65d-f5c2c6ece607.png)
 배포기간 동안 Availability 가 100%를 유지하기 때문에 무정지 재배포가 성공한 것으로 확인됨.
 
 ## Self-healing (Liveness Probe)
