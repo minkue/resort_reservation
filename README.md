@@ -737,28 +737,31 @@ http a8531a7e562514fde999e2f6e73663da-2013166645.ca-central-1.elb.amazonaws.com:
 
 ## CI/CD 설정
 
-각 구현체들은 각자의 source repository 에 구성되었고, 각 서비스별로 Docker로 빌드를 하여, Docker Hub에 등록 후 deployment.yaml, service.yml을 통해 EKS에 배포함.
+각 구현체들은 각자의 source repository 에 구성되었고, 각 서비스별로 Docker로 빌드를 하여, AWS ECR에 등록 후 deployment.yaml, service.yml을 통해 EKS에 배포하였다.
+(팀 과제 구현시에는 docker hub를 사용했으나 ECR로 변경하였다.)
+
 - git에서 소스 가져오기
 ```bash
-git clone https://github.com/simair77/resort_reservation.git
+git clone https://github.com/minkue/resort_reservation.git
 ```
 - 각서비스별 packege, build, github push 실행
+- 신규 payment, voucher 또한 아래와 같이 해당 경로에서 명령어를 수행하였고 각각 deployment.yml , service.yaml 파일을 구현하였다.
 ```bash
 cd resort #서비스별 폴더로 이동
 mvn package -B -Dmaven.test.skip=true #패키지
 
-docker build -t simair/resort:latest . #docker build
-docker push simair/resort:latest       #docker push
+docker build -t 879772956301.dkr.ecr.ca-central-1.amazonaws.com/user24-resort:latest . #docker build
+docker push 879772956301.dkr.ecr.ca-central-1.amazonaws.com/user24-resort:latest       #ECR push
 
 kubectl apply -f resort/kubernetes/deployment.yml #AWS deploy 수행
 kubectl apply -f resort/kubernetes/service.yaml.  #AWS service 등록
 
 ```
-- Docker Hub Image
-<img width="953" alt="image" src="https://user-images.githubusercontent.com/85722851/125232400-80d30c80-e317-11eb-846c-cbd5b0ded2ba.png">
+- AWS ECR Image
+![image](https://user-images.githubusercontent.com/58622901/126935208-82673dff-1602-4b86-b7c0-5abc637e1f83.png)
 
 - 최종 Deploy완료
-<img width="895" alt="image" src="https://user-images.githubusercontent.com/85722851/125232490-b4ae3200-e317-11eb-998c-88e5833866c7.png">
+![image](https://user-images.githubusercontent.com/58622901/126935290-f50cc6d6-3263-48d4-b1a2-4fa99fbd8bcf.png)
 
 ## 동기식 호출 / 서킷 브레이킹 / 장애격리
 
