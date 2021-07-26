@@ -152,10 +152,17 @@ http a8531a7e562514fde999e2f6e73663da-2013166645.ca-central-1.elb.amazonaws.com:
 ```
 ![image](https://user-images.githubusercontent.com/58622901/126924833-f21e3d1b-e658-44b9-acf9-626958bd8f7f.png)
 
-7.
+7. 바우처를 고객에게 발송한다. (개인 Final 과제 수행 시 추가)
+```sh
+http PATCH a8531a7e562514fde999e2f6e73663da-2013166645.ca-central-1.elb.amazonaws.com:8080/vouchers/1 voucherStatus="Send" 
+```
+![image](https://user-images.githubusercontent.com/58622901/126929882-c3cb6555-f43f-4719-b21d-2c43dc7f675b.png)
 
-
-
+8. 고객이 마이페이지에서 바우처를 조회한다. (개인 Final 과제 수행 시 추가)
+```sh
+http PATCH a8531a7e562514fde999e2f6e73663da-2013166645.ca-central-1.elb.amazonaws.com:8080/vouchers/1 voucherStatus="Send" 
+```
+![image](https://user-images.githubusercontent.com/58622901/126929948-4a2e897a-677b-4071-82b5-987d5fc2b217.png)
 
 
 4. 고객이 확정된 예약을 취소할 수 있다.
