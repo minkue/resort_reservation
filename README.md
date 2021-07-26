@@ -357,6 +357,8 @@ server:
 {"eventType":"VoucherSend","timestamp":"20210726034107","id":1,"reservId":1,"voucherCode":"1code","voucherStatus":"Canceled"}
 {"eventType":"VoucherCancelled","timestamp":"20210726034107","id":1,"reservId":1,"voucherCode":"1code","voucherStatus":"Canceled"}
 ```
+- mypage에 이벤트가 발생할때마다 모두 구독하지만 서비스별로 상태값을 체크하여 수행되도록 구현하였다. 
+
 
 예약/결제/바우처전송/예약취소 후 mypage 화면 (개인 Final 과제 수행)
 
