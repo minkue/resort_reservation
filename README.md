@@ -1049,19 +1049,32 @@ Shortest transaction:           0.75
 
 
 ## 오토스케일 아웃
-- 앞서 CB 는 시스템을 안정되게 운영할 수 있게 해줬지만 사용자의 요청을 100% 받아들여주지 못했기 때문에 이에 대한 보완책으로 자동화된 확장 기능을 적용하고자 한다. 
-- 리조트서비스에 대한 replica 를 동적으로 늘려주도록 HPA 를 설정한다. 설정은 CPU 사용량이 20프로를 넘어서면 replica 를 10개까지 늘려준다:
-```bash
-kubectl autoscale deployment resort --cpu-percent=20 --min=1 --max=10
-```
-- CB 에서 했던 방식대로 워크로드를 100초 동안 걸어준다.
-```bash
-siege -c20 -t100S -v http://resort:8080/resorts 
-```
-<img width="533" alt="image" src="https://user-images.githubusercontent.com/85722851/125200066-20ef4e00-e2a4-11eb-893e-7407615daa18.png">
+- 앞서 Circuit Breaker는 시스템을 안정되게 운영할 수 있게 하지만 사용자의 요청을 100% 받아들여주지 못했기 때문에 이에 대한 보완책으로 자동화된 확장 기능을 적용하고자 한다. 
+- 리조트서비스에 대한 replica 를 동적으로 늘려주도록 HPA 를 설정한다. 설정은 CPU 사용량이 20프로를 넘어서면 replica 를 3개까지 늘려준다
 
-- 오토스케일이 어떻게 되고 있는지 모니터링을 해보면 어느정도 시간이 흐른 후 스케일 아웃이 벌어지는 것을 확인할 수 있다:
-<img width="704" alt="image" src="https://user-images.githubusercontent.com/85722851/125234907-926ae300-e31c-11eb-8be4-377f595f9a24.png">
+```java 
+paymentservice deployment.yml
+containers:
+        - name: payment
+          image: 879772956301.dkr.ecr.ca-central-1.amazonaws.com/user24-payment:latest
+          ports:
+            - containerPort: 8080
+          resources:
+            requests:
+              cpu: "200m"
+```
+
+```bash
+kubectl autoscale deployment payment --cpu-percent=20 --min=1 --max=3
+```
+- Circuit Breaker 에서 했던 방식대로 워크로드를 60초 동안 걸어준다.
+```bash
+siege -c40 -t60S -v http://payment:8080/payments
+```
+![image](https://user-images.githubusercontent.com/58622901/126938909-0fcc3f70-fb11-4b2a-bef7-c90f73480b8b.png)
+
+- seige 수행 후 payment 시스템의 pod가 3개까지 scale out 된 것을 확인 할 수 있다.:
+![image](https://user-images.githubusercontent.com/58622901/126938755-9d68a751-fa2c-4247-9f59-08b28f1cfaa9.png)
 
 
 ## Zero-Downtime deploy (Readiness Probe)
