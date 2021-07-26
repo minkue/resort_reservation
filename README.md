@@ -1123,41 +1123,47 @@ kubectl apply -f  kubernetes/deployment.yml
 ![image](https://user-images.githubusercontent.com/58622901/126943108-4cd4496c-d239-4c9e-804f-872134c3fa43.png)
 
 ## ConfigMap 사용
-- 시스템별로 또는 운영중에 동적으로 변경 가능성이 있는 설정들을 ConfigMap을 사용하여 관리합니다. Application에서 특정 도메일 URL을 ConfigMap 으로 설정하여 운영/개발등 목적에 맞게 변경가능합니다.
-configMap 생성
+- 시스템별로 또는 운영중에 동적으로 변경 가능성이 있는 설정들을 ConfigMap을 사용하여 관리한다. 
+- Application에서 특정 도메일 URL을 ConfigMap 으로 설정하여 운영/개발등 목적에 맞게 변경가능함.
+
+- configMap 생성
 ```bash
 kubectl apply -f - <<EOF
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  name: resort-cm
+  name: payment-cm
 data:
-    api.resort.url: resort:8080
+    api.payment.url: payment:8080
 EOF
 ```
 configmap 생성 후 조회
-<img width="881" alt="image" src="https://user-images.githubusercontent.com/85722851/125245232-470c0100-e32b-11eb-9db1-54f35d1b2e4c.png">
+![image](https://user-images.githubusercontent.com/58622901/126944419-66c189c0-c9a0-4f97-a82c-90fa339bb03d.png)
+
 deployment.yml 변경
 ```yml
       containers:
-          ...
+        - name: payment
+          image: 879772956301.dkr.ecr.ca-central-1.amazonaws.com/user24-payment:latest
+          ports:
+            - containerPort: 8080
           env:
-            - name: feign.resort.url
+            - name: feign.payment.url
               valueFrom:
                 configMapKeyRef:
-                  name: resort-cm
-                  key: api.resort.url
+                  name: payment-cm
+                  key: api.payment.url
 ```
 ResortService.java내용
 ```java
-@FeignClient(name="resort", url="${feign.resort.url}")
-public interface ResortService {
+@FeignClient(name="payment",contextId = "feignClientForPayment", url="${feign.payment.url}",  fallback = PaymentServiceFallback.class)
+public interface PaymentService {
 
-    @RequestMapping(method= RequestMethod.GET, value="/resorts/{id}", consumes = "application/json")
-    public Resort getResortStatus(@PathVariable("id") Long id);
+    @RequestMapping(method= RequestMethod.GET, value="/payments/{id}", consumes = "application/json")
+    public Payment getPaymentStatus(@PathVariable("id") Long id);
 
 }
 ```
 생성된 Pod 상세 내용 확인
-<img width="1036" alt="image" src="https://user-images.githubusercontent.com/85722851/125245075-162bcc00-e32b-11eb-80ab-81fa57e774d8.png">
+![image](https://user-images.githubusercontent.com/58622901/126945585-7c4ab4f2-5b0a-444a-bf8c-97ebced26d5b.png)
 
