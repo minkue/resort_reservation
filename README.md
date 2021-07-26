@@ -712,23 +712,23 @@ public class MyPageViewHandler {
 # 마이페이지,바우처 서비스는 잠시 셧다운 시키고 예약이력 및 바우처 전송내용 확인 가능 
 
 1.리조트입력
-http localhost:8082/resorts resortName="Jeju" resortType="Hotel" resortPrice=100000 resortStatus="Available" resortPeriod="7/23~25"
-http localhost:8082/resorts resortName="Seoul" resortType="Hotel" resortPrice=100000 resortStatus="Available" resortPeriod="7/23~25"
+http a8531a7e562514fde999e2f6e73663da-2013166645.ca-central-1.elb.amazonaws.com:8080/resorts resortName="Jeju" resortType="Hotel" resortPrice=100000 resortStatus="Available" resortPeriod="7/23~25"
+http a8531a7e562514fde999e2f6e73663da-2013166645.ca-central-1.elb.amazonaws.com:8080/resorts resortName="Seoul" resortType="Hotel" resortPrice=100000 resortStatus="Available" resortPeriod="7/23~25"
 
 2.예약입력
-http localhost:8081/reservations resortId=1 memberName="MK" 
-http localhost:8081/reservations #예약 정상 처리 확인
+http a8531a7e562514fde999e2f6e73663da-2013166645.ca-central-1.elb.amazonaws.com:8080/reservations resortId=1 memberName="MK" 
+http a8531a7e562514fde999e2f6e73663da-2013166645.ca-central-1.elb.amazonaws.com:8080/reservations #예약 정상 처리 확인
 
 3.결제 
-http PATCH http://localhost:8084/payments/1 reservStatus="Paid"
+http PATCH a8531a7e562514fde999e2f6e73663da-2013166645.ca-central-1.elb.amazonaws.com:8080/payments/1 reservStatus="Paid"
 
 4.마이페이지서비스 기동
 
 5.바우처서비스 기동
 
 6.마이페이지, 바우처서비스 확인
-http localhost:8083/myPages #정상적으로 마이페이지에서 예약 이력이 확인 됨
-http localhost:8085/vouchers #정상적으로 바우처이력이 확인 됨 
+http a8531a7e562514fde999e2f6e73663da-2013166645.ca-central-1.elb.amazonaws.com:8080/myPages #정상적으로 마이페이지에서 예약 이력이 확인 됨
+http a8531a7e562514fde999e2f6e73663da-2013166645.ca-central-1.elb.amazonaws.com:8080/vouchers #정상적으로 바우처이력이 확인 됨 
 
 ```
 
