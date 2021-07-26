@@ -909,13 +909,13 @@ Shortest transaction:           1.33
 
 ![image](https://user-images.githubusercontent.com/58622901/125236641-4ff6d580-e31f-11eb-8659-6886b5cfacc5.png)
 
-* 서킷 브레이크 프레임워크 : Spring FeignClient + Hystrix 옵션을 사용 (개인 Final) 
+* 서킷 브레이크 프레임워크 : Spring FeignClient + Hystrix 옵션을 사용 (개인 Final 과제시 구현) 
 
-- 시나리오 : 예약(reservation) -> 결제(payment) 예약 시 RESTful Request/Response 로 구현이 하였고, 예약 요청이 과도할 경우 circuit breaker 를 통하여 장애격리.
-- Hystrix 설정: 요청처리 쓰레드에서 처리시간이 610 밀리초가 넘어서기 시작하여 어느정도 유지되면 circuit breaker 수행됨
+- 시나리오 : 예약(reservation) -> 결제(payment) 예약 시 RESTful Request/Response 로 구현 하였고, 예약 요청이 과도할 경우 circuit breaker 를 통하여 장애격리 하였다.
+- Hystrix 설정: 요청처리 쓰레드에서 처리시간이 610 밀리초가 넘어서기 시작하여 어느정도 유지되면 circuit breaker가 수행 된다.
 
 ```yaml
-# application.yml
+#reservation 서비스 application.yml
 feign:
   resort:
     url: localhost:8082
@@ -932,7 +932,8 @@ hystrix:
 
 ```
 
-피호출 서비스(결제:payment) 의 임의 부하 처리 - 400 밀리초 ~ 620밀리초의 지연시간 부여
+- 피호출 서비스(결제:payment) 의 임의 부하 처리 - 400 밀리초 ~ 620밀리초의 지연시간 부여
+- circuit breaker 발동 시 문구와 함께 null을  
 ```java
 # (payment) PaymentController.java 
 
