@@ -1103,7 +1103,7 @@ kubectl apply -f  kubernetes/deployment.yml
 
 - 동일한 시나리오로 재배포 한 후 Availability 확인
 ![image](https://user-images.githubusercontent.com/58622901/126942146-bdbd101b-e715-4b25-b65d-f5c2c6ece607.png)
-배포기간 동안 Availability 가 100%를 유지하기 때문에 무정지 재배포가 성공한 것으로 확인됨.
+- 배포기간 동안 Availability 가 100%를 유지하기 때문에 무정지 재배포가 성공한 것으로 확인됨.
 
 ## Self-healing (Liveness Probe)
 - Pod는 정상적으로 작동하지만 내부의 어플리케이션이 반응이 없다면, 컨테이너는 의미가 없다.
@@ -1119,8 +1119,8 @@ kubectl apply -f  kubernetes/deployment.yml
             periodSeconds: 5
             failureThreshold: 5
 ```
-- resort Pod가 여러차례 재시작 한것을 확인할 수 있다.
-<img width="757" alt="image" src="https://user-images.githubusercontent.com/85722851/125048777-3cf3c380-e0db-11eb-99cd-97c7ebead85f.png">
+- payment Pod가 여러차례 재시작 한것을 확인할 수 있다.
+![image](https://user-images.githubusercontent.com/58622901/126943108-4cd4496c-d239-4c9e-804f-872134c3fa43.png)
 
 ## ConfigMap 사용
 - 시스템별로 또는 운영중에 동적으로 변경 가능성이 있는 설정들을 ConfigMap을 사용하여 관리합니다. Application에서 특정 도메일 URL을 ConfigMap 으로 설정하여 운영/개발등 목적에 맞게 변경가능합니다.
