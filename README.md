@@ -33,7 +33,7 @@
 4. 예약이 확정되어 휴양소는 예약불가 상태로 바뀐다.
 5. 바우처를 고객에게 발송한다. (팀과제에서 제외했던 부분 구현)
 6. 고객이 확정된 예약을 취소할 수 있다.
-7. 주문이 취소되면 바우처가 비활성화 된다.(팀과제에서 제외했던 부분 구현)
+7. 이 취소되면 바우처가 비활성화 된다.(팀과제에서 제외했던 부분 구현)
 8. 휴양소는 예약가능 상태로 바뀐다.
 9. 고객은 휴양소 예약 정보를 확인 할 수 있다.
 
@@ -164,29 +164,40 @@ http PATCH a8531a7e562514fde999e2f6e73663da-2013166645.ca-central-1.elb.amazonaw
 ```
 ![image](https://user-images.githubusercontent.com/58622901/126929948-4a2e897a-677b-4071-82b5-987d5fc2b217.png)
 
-
-4. 고객이 확정된 예약을 취소할 수 있다.
+9. 고객이 확정된 예약을 취소할 수 있다.
 ```sh
-http PATCH aa9c6a809425d45b69b139edc5237d53-1942883713.ap-northeast-2.elb.amazonaws.com:8080/reservations/1 resortStatus="Cancelled"
+http PATCH a8531a7e562514fde999e2f6e73663da-2013166645.ca-central-1.elb.amazonaws.com:8080/reservations/1 resortStatus="Cancelled"
 ```
-<img width="994" alt="image" src="https://user-images.githubusercontent.com/85722851/125231248-5c763080-e315-11eb-9f58-0637fed3d099.png">
+![image](https://user-images.githubusercontent.com/58622901/126930046-173614b7-cf22-46c0-8d54-07055d35ce2e.png)
 
-
-5. 휴양소는 예약 가능상태로 바뀐다.
+10. 예약이 취소되면 바우처가 비활성화 된다. (개인 Final 과제 수행 시 추가)
 ```sh
-http aa9c6a809425d45b69b139edc5237d53-1942883713.ap-northeast-2.elb.amazonaws.com:8080/resorts/2
+http a8531a7e562514fde999e2f6e73663da-2013166645.ca-central-1.elb.amazonaws.com:8080/vouchers
 ```
-<img width="994" alt="image" src="https://user-images.githubusercontent.com/85722851/125231271-6c8e1000-e315-11eb-92e2-bcb2897f6449.png">
+![image](https://user-images.githubusercontent.com/58622901/126930150-6f4f0f51-1175-4df7-9303-f3cb91c25be2.png)
 
-6. 고객은 휴양소 예약 정보를 확인 할 수 있다.
+11. 예약이 취소되면 결제가 취소된다. (개인 Final 과제 수행 시 추가)
 ```sh
-http aa9c6a809425d45b69b139edc5237d53-1942883713.ap-northeast-2.elb.amazonaws.com:8080/myPages
+http a8531a7e562514fde999e2f6e73663da-2013166645.ca-central-1.elb.amazonaws.com:8080/payments 
 ```
-<img width="992" alt="image" src="https://user-images.githubusercontent.com/85722851/125231312-7c0d5900-e315-11eb-93bf-af4f025fc3d3.png">
+![image](https://user-images.githubusercontent.com/58622901/126930222-0239318a-ed79-4296-9e89-14ebf92c5f33.png)
+
+12. 휴양소는 예약 가능상태로 변경된다.
+```sh
+http a8531a7e562514fde999e2f6e73663da-2013166645.ca-central-1.elb.amazonaws.com:8080/resorts
+```
+![image](https://user-images.githubusercontent.com/58622901/126930300-f6dacc7a-f611-4e47-8211-b097df6fdcf6.png)
+
+13. 고객이 마이페이지를 통해 예약정보를 확인한다. (개인 Final 과제 수행 시 추가)
+```sh
+http a8531a7e562514fde999e2f6e73663da-2013166645.ca-central-1.elb.amazonaws.com:8080/myPages
+```
+![image](https://user-images.githubusercontent.com/58622901/126930372-c7ccdb94-2dd7-4354-a4e8-09d1ae5f2f91.png)
+
 
 ## DDD 의 적용
 - 팀 과제 시 이벤트 스토밍을 통해 식별된 Micro Service 전체 5개 중 3개를 구현하였으며 그 중 mypage는 CQRS를 위한 서비스이다.
-- 개인 과제 시 payment, voucher 서비스를 추가로 구현하였다.
+- 개인 과제 시 payment, voucher 서비스를 추가로 구현하였으며 CQRS를 위한 mypages에도 해당 서비스의 상태값을 추가하여 조회 할 수 있다. 
 
 |MSA|기능|port|URL|
 | :--: | :--: | :--: | :--: |
