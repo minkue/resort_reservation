@@ -327,22 +327,40 @@ server:
 - 개인과제 구현 시 결제, 바우처서비스의 이벤트(결제, 전송, 취소)를 수신하도록 추가하였다.
 
 예약 실행
+![image](https://user-images.githubusercontent.com/58622901/126924229-8698a632-4479-47c5-b713-87757d542785.png)
 
-<img width="993" alt="image" src="https://user-images.githubusercontent.com/85722851/125231135-2769de00-e315-11eb-8b6e-f0e4711c2760.png">
+결제 실행(개인 Final 과제 수행)
+![image](https://user-images.githubusercontent.com/58622901/126924657-c383b26b-274b-495c-a342-1773fc85a41b.png)
+
+바우처 전송 실행 (개인 Final 과제 수행)
+![image](https://user-images.githubusercontent.com/58622901/126929882-c3cb6555-f43f-4719-b21d-2c43dc7f675b.png)
+
+예약 취소 (개인 Final 과제 수행)
+![image](https://user-images.githubusercontent.com/58622901/126930046-173614b7-cf22-46c0-8d54-07055d35ce2e.png)
 
 카프카 메시지
-<img width="962" alt="image" src="https://user-images.githubusercontent.com/85722851/125224363-73625600-e308-11eb-9cd2-2dfccf0aa78f.png">
+![image](https://user-images.githubusercontent.com/58622901/126932495-91409dda-4fbe-4906-9a5d-8ca83fb85fcd.png)
 ```bash
-{"eventType":"ReservationRegistered","timestamp":"20210712022656","id":1,"resortId":2,"resortName":"Seoul","resortStatus":"Confirmed","resortType":"Hotel","resortPeriod":"7/23~25","resortPrice":100000.0,"memberName":"sim sang joon"}
-{"eventType":"ResortStatusChanged","timestamp":"20210712022656","id":2,"resortName":"Seoul","resortStatus":"Not Available","resortType":"Hotel","resortPeriod":"7/23~25","resortPrice":100000.0}
-{"eventType":"ReservationCanceled","timestamp":"20210712022719","id":1,"resortId":2,"resortName":"Seoul","resortStatus":"Cancelled","resortType":"Hotel","resortPeriod":"7/23~25","resortPrice":100000.0,"memberName":"sim sang joon"}
-{"eventType":"ResortStatusChanged","timestamp":"20210712022719","id":2,"resortName":"Seoul","resortStatus":"Available","resortType":"Hotel","resortPeriod":"7/23~25","resortPrice":100000.0}
+{"eventType":"ResortRegistrated","timestamp":"20210726021154","id":1,"resortName":"Jeju","resortStatus":"Available","resortType":"Hotel","resortPeriod":"7/23~25","resortPrice":100000.0}
+{"eventType":"ReservationRegistered","timestamp":"20210726021651","id":1,"resortId":1,"resortName":"Jeju","resortStatus":"Confirmed","resortType":"Hotel","resortPeriod":"7/23~25","resortPrice":100000.0,"memberName":"MK"}
+{"eventType":"ResortStatusChanged","timestamp":"20210726021651","id":1,"resortName":"Jeju","resortStatus":"Not Available","resortType":"Hotel","resortPeriod":"7/23~25","resortPrice":100000.0}
+{"eventType":"PaymentRequested","timestamp":"20210726021652","id":1,"reservId":1,"resortPrice":100000.0,"reservStatus":"Waiting for payment"}
+{"eventType":"PaymentApproved","timestamp":"20210726022239","id":1,"reservId":1,"resortPrice":100000.0,"reservStatus":"Paid"}
+{"eventType":"PaymentCancelled","timestamp":"20210726022239","id":1,"reservId":1,"resortPrice":100000.0,"reservStatus":"Paid"}
+{"eventType":"VoucherRequested","timestamp":"20210726022240","id":1,"reservId":1,"voucherCode":"1code","voucherStatus":"Approved"}
+{"eventType":"VoucherSend","timestamp":"20210726033803","id":1,"reservId":1,"voucherCode":"1code","voucherStatus":"Send"}
+{"eventType":"VoucherCancelled","timestamp":"20210726033803","id":1,"reservId":1,"voucherCode":"1code","voucherStatus":"Send"}
+{"eventType":"ReservationCanceled","timestamp":"20210726034107","id":1,"resortId":1,"resortName":"Jeju","resortStatus":"Cancelled","resortType":"Hotel","resortPeriod":"7/23~25","resortPrice":100000.0,"memberName":"MK"}
+{"eventType":"ResortStatusChanged","timestamp":"20210726034107","id":1,"resortName":"Jeju","resortStatus":"Available","resortType":"Hotel","resortPeriod":"7/23~25","resortPrice":100000.0}
+{"eventType":"PaymentApproved","timestamp":"20210726034107","id":1,"reservId":1,"resortPrice":100000.0,"reservStatus":"Canceled"}
+{"eventType":"PaymentCancelled","timestamp":"20210726034107","id":1,"reservId":1,"resortPrice":100000.0,"reservStatus":"Canceled"}
+{"eventType":"VoucherSend","timestamp":"20210726034107","id":1,"reservId":1,"voucherCode":"1code","voucherStatus":"Canceled"}
+{"eventType":"VoucherCancelled","timestamp":"20210726034107","id":1,"reservId":1,"voucherCode":"1code","voucherStatus":"Canceled"}
 ```
 
-예약/예약취소 후 mypage 화면
+예약/결제/바우처전송/예약취소 후 mypage 화면 (개인 Final 과제 수행)
 
-<img width="992" alt="image" src="https://user-images.githubusercontent.com/85722851/125231312-7c0d5900-e315-11eb-93bf-af4f025fc3d3.png">
-
+![image](https://user-images.githubusercontent.com/58622901/126930372-c7ccdb94-2dd7-4354-a4e8-09d1ae5f2f91.png)
 
 ## 동기식 호출과 Fallback 처리
 
