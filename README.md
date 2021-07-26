@@ -359,9 +359,13 @@ server:
 ```
 - mypage에 이벤트가 발생할때마다 모두 구독하지만 서비스별로 상태값을 체크하여 수행되도록 구현하였다. 
 
+- 결제 후 mypage화면 
+![image](https://user-images.githubusercontent.com/58622901/126924833-f21e3d1b-e658-44b9-acf9-626958bd8f7f.png)
 
-예약/결제/바우처전송/예약취소 후 mypage 화면 (개인 Final 과제 수행)
+- 바우처 전송 후 mypage화면 
+![image](https://user-images.githubusercontent.com/58622901/126929948-4a2e897a-677b-4071-82b5-987d5fc2b217.png)
 
+- 예약취소 후 mypage 화면 (개인 Final 과제 수행)
 ![image](https://user-images.githubusercontent.com/58622901/126930372-c7ccdb94-2dd7-4354-a4e8-09d1ae5f2f91.png)
 
 ## 동기식 호출과 Fallback 처리
