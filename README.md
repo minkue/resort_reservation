@@ -1140,7 +1140,7 @@ EOF
 configmap 생성 후 조회
 ![image](https://user-images.githubusercontent.com/58622901/126944419-66c189c0-c9a0-4f97-a82c-90fa339bb03d.png)
 
-deployment.yml 변경
+reservation서비스의 deployment.yml 변경
 ```yml
       containers:
         - name: payment
@@ -1154,7 +1154,7 @@ deployment.yml 변경
                   name: payment-cm
                   key: api.payment.url
 ```
-ResortService.java내용
+PaymentService.java내용
 ```java
 @FeignClient(name="payment",contextId = "feignClientForPayment", url="${feign.payment.url}",  fallback = PaymentServiceFallback.class)
 public interface PaymentService {
