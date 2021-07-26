@@ -449,7 +449,7 @@ public interface PaymentService {
         //Payment 서비스에서 Payment의 상태를 가져옴
         payment = ReservationApplication.applicationContext.getBean(resortreservation.external.PaymentService.class).getPaymentStatus(test);
         
-         fallback 시 payment null return
+        // fallback 시 payment null return
            if (payment == null){ 
                throw new Exception("The payment is not in a usable status.");
            }   
