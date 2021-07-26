@@ -480,9 +480,11 @@ public class Reservation {
 ```
 - 결제시스템과 바우처시스템, 마이페이지시스템에서는 예약완료,결제완료 이벤트에 대해서 이를 수신하여 자신의 정책을 처리하도록 PolicyHandler 를 구현한다
 
-결제시스템(팀과제에서는 미구현) --> 개인 Final 과제 수행 시 구현
+결제시스템 (개인 Final 과제 수행 시 구현)
 - 예약완료 후 결제대기 상태로 payment 객체를 생성한다.
 - 예약취소 후 결제상태를 Canceled로 변경 한다
+- 예약ID별 결제상태를 변경해야 하므로 paymentRepository에 findByReservId 인터페이스를 추가하였다. 
+
 ```java
 
 @Service
@@ -502,7 +504,7 @@ public class PolicyHandler{
             payment.setResortPrice(reservationRegistered.getResortPrice());
             paymentRepository.save(payment);
             
-    }
+    } 
     @StreamListener(KafkaProcessor.INPUT)
     public void wheneverReservationCanceled_PaymentCancelPolicy(@Payload ReservationCanceled reservationCanceled){
 
@@ -511,7 +513,7 @@ public class PolicyHandler{
         System.out.println("\n\n##### listener PaymentCancelPolicy : " + reservationCanceled.toJson() + "\n\n");
 
         // 결제완료 상태를 결제취소 상태로 변경
-        paymentRepository.findById(reservationCanceled.getId())
+        paymentRepository.findByReservId(reservationCanceled.getId())
         .ifPresent(
             payment -> {
                 payment.setReservStatus("Canceled");
@@ -520,13 +522,20 @@ public class PolicyHandler{
         );
             
     }
+
+
+    @StreamListener(KafkaProcessor.INPUT)
+    public void whatever(@Payload String eventString){}
+
+
 }
 ```
-- voucher 시스템에서는 결제완료 시 바우처를 승인 상태로 변경하였다 voucher 서비스 또한 개인 Final 과제 수행 시 구현 하였다. 
+
+바우처시스템(개인 Final 과제 수행 시 구현)  
 - 결제완료 후 해당 예약의 바우처를 Approved 상태로 변경
 - 예약취소 시 결제취소 처리되며 해당 바우처 또한 Canceled 상태로 변경한다 
+- 예약ID별 바우처상태를 변경해야 하므로 voucherRepository에 findByReservId 인터페이스를 추가하였다. 
 
-바우처시스템
 
 ```java
 @Service
@@ -582,9 +591,14 @@ public class PolicyHandler{
 
 ```
 
--개인 Final 과제 수행 시 마이페이지에 결제상태와 바우처상태를 구독하여 조회 할 수 있도록 추가하였다. 
 
-마이페이지시스템
+마이페이지시스템 (개인 Final 과제 수행 시 추가)
+- 개인 Final 과제 수행 시 마이페이지에 결제상태와 바우처상태를 구독하여 조회 할 수 있도록 추가하였다. 
+- 예약완료 시 결제대기 상태를 조회할 수 있도록 추가하였다.
+- 결제완료 시 결제완료 상태를 조회할 수 있도록 추가하였다.
+- 바우처 전송 시 바우처 상태를 조회할 수 있도록 추가하였다. 
+- 예약취소 시 예약,결제,바우처 모두 취소됨을 조회할 수 있게 구현하였다.
+
 ```java
 @Service
 public class MyPageViewHandler {
@@ -692,7 +706,8 @@ public class MyPageViewHandler {
      }
 }
 ```
-- 예약 시스템은 바우처시스템/마이페이지 시스템과 완전히 분리되어있으며, 이벤트 수신에 따라 처리되기 때문에, 바우처시스템/마이시스템이 유지보수로 인해 잠시 내려간 상태라도 예약을 받는데 문제가 없다
+- 예약 시스템은 바우처시스템,마이페이지 등 시스템과 완전히 분리되어있으며, 이벤트 수신에 따라 처리되기 때문에 해당 시스템들이 유지보수로 인해 잠시 내려간 상태라도 예약을 받는데 문제가 없다
+
 ```bash
 # 마이페이지,바우처 서비스는 잠시 셧다운 시키고 예약이력 및 바우처 전송내용 확인 가능 
 
