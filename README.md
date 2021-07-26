@@ -128,26 +128,34 @@ http a8531a7e562514fde999e2f6e73663da-2013166645.ca-central-1.elb.amazonaws.com:
 ```
 ![image](https://user-images.githubusercontent.com/58622901/126924229-8698a632-4479-47c5-b713-87757d542785.png)
 
-3. 고객이 마이페이지에 예약 및 결제대기상태를 조회한다. (개인 Final 과제 수행 시 추가)
+3. 예약이 확정되어 휴양소는 예약불가 상태로 바뀐다.
+```sh
+http a8531a7e562514fde999e2f6e73663da-2013166645.ca-central-1.elb.amazonaws.com:8080/resorts/1
+```
+![image](https://user-images.githubusercontent.com/58622901/126925036-bc87d704-95ac-4d0a-b922-f17cbaaf65e3.png)
+
+4. 고객이 마이페이지에 예약 및 결제대기상태를 조회한다. (개인 Final 과제 수행 시 추가)
 ```sh
 http a8531a7e562514fde999e2f6e73663da-2013166645.ca-central-1.elb.amazonaws.com:8080/myPages
 ```
 ![image](https://user-images.githubusercontent.com/58622901/126924387-29937a56-040c-47e1-9850-19f01fa7ebde.png)
 
-4. 고객이 결제서비스를 통해 결제한다. (개인 Final 과제 수행 시 추가)
+5. 고객이 결제서비스를 통해 결제한다. (개인 Final 과제 수행 시 추가)
 ```sh
 http PATCH a8531a7e562514fde999e2f6e73663da-2013166645.ca-central-1.elb.amazonaws.com:8080/payments/1 reservStatus="Paid"
 ```
 ![image](https://user-images.githubusercontent.com/58622901/126924657-c383b26b-274b-495c-a342-1773fc85a41b.png)
 
-
-
-
-3. 예약이 확정되어 휴양소는 예약불가 상태로 바뀐다.
+6. 고객이 마이페이지에 결제상태를 조회한다. (개인 Final 과제 수행 시 추가)
 ```sh
-http aa9c6a809425d45b69b139edc5237d53-1942883713.ap-northeast-2.elb.amazonaws.com:8080/resorts/2
+http a8531a7e562514fde999e2f6e73663da-2013166645.ca-central-1.elb.amazonaws.com:8080/myPages
 ```
-<img width="992" alt="image" src="https://user-images.githubusercontent.com/85722851/125231217-4a948d80-e315-11eb-923d-c257731b5d44.png">
+![image](https://user-images.githubusercontent.com/58622901/126924833-f21e3d1b-e658-44b9-acf9-626958bd8f7f.png)
+
+7.
+
+
+
 
 
 4. 고객이 확정된 예약을 취소할 수 있다.
