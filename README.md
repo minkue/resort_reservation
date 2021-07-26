@@ -933,7 +933,7 @@ hystrix:
 ```
 
 - 피호출 서비스(결제:payment) 의 임의 부하 처리 - 400 밀리초 ~ 620밀리초의 지연시간 부여
-- circuit breaker 발동 시 문구와 함께 null을  
+- circuit breaker 발동 시 문구와 함께 null을 리턴함 
 ```java
 # (payment) PaymentController.java 
 
@@ -966,7 +966,7 @@ public class PaymentServiceFallback implements PaymentService {
 
 ```bash
 $ http http://localhost:8082/resorts resortName="Jeju" resortType="Hotel" resortPrice=100000 resortStatus="Available" resortPeriod="7/23~25" -- 리조트등록
-$ http http://localhost:8084/payments reservStatus="Waiting for payment" -- 결제서비스 확인을 위한 임의의 값 세팅
+$ http http://localhost:8084/payments reservStatus="Waiting for payment" -- 결제서비스 확인을 위한 생성  
 
 $ siege -v -c100 -t10S -r10 --content-type "application/json" 'http://localhost:8081/reservations/ POST {"resortId":1, "memberName":"MK"}' 
 
