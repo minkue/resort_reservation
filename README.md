@@ -124,9 +124,23 @@ http a8531a7e562514fde999e2f6e73663da-2013166645.ca-central-1.elb.amazonaws.com:
 
 2. 고객이 휴양소를 선택하여 예약한다.
 ```sh
-http aa9c6a809425d45b69b139edc5237d53-1942883713.ap-northeast-2.elb.amazonaws.com:8080/reservations resortId=2 memberName="sim sang joon"
+http a8531a7e562514fde999e2f6e73663da-2013166645.ca-central-1.elb.amazonaws.com:8080/reservations resortId=1 memberName="MK"
 ```
-<img width="993" alt="image" src="https://user-images.githubusercontent.com/85722851/125231135-2769de00-e315-11eb-8b6e-f0e4711c2760.png">
+![image](https://user-images.githubusercontent.com/58622901/126924229-8698a632-4479-47c5-b713-87757d542785.png)
+
+3. 고객이 마이페이지에 예약 및 결제대기상태를 조회한다. (개인 Final 과제 수행 시 추가)
+```sh
+http a8531a7e562514fde999e2f6e73663da-2013166645.ca-central-1.elb.amazonaws.com:8080/myPages
+```
+![image](https://user-images.githubusercontent.com/58622901/126924387-29937a56-040c-47e1-9850-19f01fa7ebde.png)
+
+4. 고객이 결제서비스를 통해 결제한다. (개인 Final 과제 수행 시 추가)
+```sh
+http PATCH a8531a7e562514fde999e2f6e73663da-2013166645.ca-central-1.elb.amazonaws.com:8080/payments/1 reservStatus="Paid"
+```
+![image](https://user-images.githubusercontent.com/58622901/126924657-c383b26b-274b-495c-a342-1773fc85a41b.png)
+
+
 
 
 3. 예약이 확정되어 휴양소는 예약불가 상태로 바뀐다.
