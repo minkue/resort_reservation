@@ -422,7 +422,7 @@ public interface ResortService {
 - 개인 Final 과제 수행 시에는 예약(reservation)->결제서비스상태확인(payment) 호출을 추가하여 동기식 일관성을 유지하는 트랜잭션을 구현하여 처리하였다. 호출 프로토콜은 이미 앞서 Rest Repository 에 의해 노출되어있는 REST 서비스를 FeignClient를 이용하여 호출하였다
 
 - 결제서비스를 호출하기 위하여 Stub과 (FeignClient) 를 이용하여 Service 대행 인터페이스 (Proxy) 를 구현하였다
-- 기존에 resort 서비스의 feignClient와 충돌이 나지 않기위해 각각 contextId를 부여하였다 (resortServicedml contextId는 feignClientForResort이다.)
+- 기존에 resort 서비스의 feignClient와 충돌이 나지 않기위해 각각 contextId를 부여하였다 (resortService contextId는 feignClientForResort이다.)
 
 ```java
 # (reservation) PaymentService.java
