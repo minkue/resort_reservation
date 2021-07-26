@@ -16,7 +16,7 @@ spec:
     spec:
       containers:
         - name: resort
-          image: username/resort:latest
+          image: 879772956301.dkr.ecr.ca-central-1.amazonaws.com/user24-resort:latest
           ports:
             - containerPort: 8080
           readinessProbe:

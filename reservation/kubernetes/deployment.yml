@@ -16,9 +16,15 @@ spec:
     spec:
       containers:
         - name: reservation
-          image: username/reservation:latest
+          image: 879772956301.dkr.ecr.ca-central-1.amazonaws.com/user24-reservation:latest
           ports:
             - containerPort: 8080
+          env:
+            - name: feign.payment.url
+              valueFrom:
+                configMapKeyRef:
+                  name: payment-cm
+                  key: api.payment.url  
           readinessProbe:
             httpGet:
               path: '/actuator/health'

@@ -48,9 +48,9 @@ public class Reservation {
         //     throw new Exception("The resort is not in a usable status.");
         // }            
         
-        System.out.print("#######paymentId="+payment);
+       // System.out.print("#######paymentId="+payment);
         //Payment 서비스에서 Payment의 상태를 가져옴
-        payment = ReservationApplication.applicationContext.getBean(resortreservation.external.PaymentService.class).getPaymentStatus(test);
+       // payment = ReservationApplication.applicationContext.getBean(resortreservation.external.PaymentService.class).getPaymentStatus(test);
         
         // fallback 시 payment null return
         //   if (payment == null){ 

@@ -34,7 +34,7 @@ public class PolicyHandler{
         System.out.println("\n\n##### listener PaymentCancelPolicy : " + reservationCanceled.toJson() + "\n\n");
 
         // 결제완료 상태를 결제취소 상태로 변경
-        paymentRepository.findById(reservationCanceled.getId())
+        paymentRepository.findByReservId(reservationCanceled.getId())
         .ifPresent(
             payment -> {
                 payment.setReservStatus("Canceled");

@@ -14,7 +14,7 @@ public class Payment {
     private Long id;
     private Long reservId;
     private Float resortPrice;
-    private String reservStatus;
+    private String reservStatus; 
 
     @PostPersist
     public void onPostPersist(){
